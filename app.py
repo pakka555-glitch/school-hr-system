@@ -151,25 +151,37 @@ def show_home():
         st.markdown('</div>', unsafe_allow_html=True)
 
     # 2) Title + Logo + Subtitle
-    st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
+import base64
 
-    if os.path.exists(LOGO_PATH):
-        st.markdown(f'<img class="kys-logo" src="./assets/logo.jpg"/>', unsafe_allow_html=True)
-    else:
-        # แสดงข้อความเล็กๆ หากหาโลโก้ไม่เจอ
-        st.markdown('<img class="kys-logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="/>',
-                    unsafe_allow_html=True)
+# --- Logo + Title ---
+st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
 
+# ✅ โหลดโลโก้แบบ Base64 (ไม่ต้องพึ่ง path)
+if os.path.exists(LOGO_PATH):
+    with open(LOGO_PATH, "rb") as f:
+        logo_data = f.read()
+        logo_base64 = base64.b64encode(logo_data).decode("utf-8")
+        st.markdown(
+            f'<img class="kys-logo" src="data:image/jpeg;base64,{logo_base64}"/>',
+            unsafe_allow_html=True,
+        )
+else:
     st.markdown(
-        f"""
-        <div class="kys-title">
-          <h1>{APP_TITLE}</h1>
-          <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</p>
-        </div>
-        """,
+        '<div class="kys-logo" style="background:#ddd;display:flex;align-items:center;justify-content:center;">❌</div>',
         unsafe_allow_html=True,
     )
-    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+    <div class="kys-title">
+      <h1>{APP_TITLE}</h1>
+      <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown("</div>", unsafe_allow_html=True)
+
 
     # 3) การ์ด 3 ใบ
     st.markdown(
