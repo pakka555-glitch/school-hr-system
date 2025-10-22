@@ -19,6 +19,44 @@ if "menu" not in st.session_state:
     st.session_state["menu"] = "หน้าแรก"
 
 
+
+# ------------------------------
+# Auth helpers (load users, check pin)
+# ------------------------------
+import pandas as pd
+
+DATA_PATH = "teachers.csv"   # ไฟล์บัญชีผู้ใช้
+
+def load_users():
+    """อ่าน users จาก teachers.csv -> DataFrame"""
+    try:
+        df = pd.read_csv(DATA_PATH, dtype=str).fillna("")
+        required = {"teacher_id","name","email","department","pin","role","admin_modules"}
+        missing = required - set(df.columns)
+        if missing:
+            st.error(f"teachers.csv ไม่มีคอลัมน์: {', '.join(missing)}")
+        return df
+    except Exception as e:
+        st.error(f"อ่านไฟล์ users ไม่ได้: {e}")
+        return pd.DataFrame(columns=["teacher_id","name","email","department","pin","role","admin_modules"])
+
+def get_user(tid: str):
+    df = load_users()
+    m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
+    return m.iloc[0].to_dict() if not m.empty else None
+
+def check_login(tid: str, pin: str):
+    """คืน (bool,user_dict|None, error_text|None)"""
+    if not tid or not pin:
+        return False, None, "กรุณากรอกให้ครบ"
+
+    u = get_user(tid)
+    if not u:
+        return False, None, "ไม่พบรหัสผู้ใช้"
+    if str(u["pin"]).strip() != str(pin).strip():
+        return False, None, "PIN ไม่ถูกต้อง"
+    return True, u, None
+
 # ==============================
 # Load Google Font + Global CSS
 # ==============================
