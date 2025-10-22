@@ -201,7 +201,7 @@ def show_home():
         <div class="kys-title" style="text-align:center; margin-top:10px;">
           <h1>{APP_TITLE}</h1>
           <p style="color:{BRAND_MUTED}; font-size:18px;">
-            ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้
+            ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลส่วนบุคคลได้ง่าย โปร่งใส และตรวจสอบได้
           </p>
         </div>
         """,
