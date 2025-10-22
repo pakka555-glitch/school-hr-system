@@ -140,7 +140,7 @@ with c1:
     st.caption("Starter รองรับบทบาทหลายระดับ — ครู / แอดมินโมดูล / แอดมินใหญ่")
 
 with st.sidebar:
-    page = st.radio("เมนู", ["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล"], index=0, key="menu")
+    page = st.radio("เมนู", ["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล"], index=0)
 
 # -------- หน้าแรก (ใหม่) --------
 def show_home():
@@ -166,8 +166,27 @@ def show_home():
             unsafe_allow_html=True
         )
 
+
+# ---------------- Routing (สลับหน้า) ----------------
+if page == "หน้าแรก":
+    show_home()
+
+elif page == "สำหรับผู้ใช้":
+    st.subheader("เข้าสู่ระบบผู้ใช้ (ครู)")
+    # TODO: วางโค้ดเดิมส่วนล็อกอินครูของครูหนึ่งไว้ตรงนี้
+    # ตัวอย่าง:
+    # tid = st.text_input("Teacher ID")
+    # pin = st.text_input("PIN", type="password")
+    # if st.button("เข้าสู่ระบบ"):
+    #     ...
+
+elif page == "สำหรับผู้ดูแล":
+    st.subheader("เข้าสู่ระบบผู้ดูแล")
+    # TODO: วางโค้ดเดิมส่วนล็อกอินผู้ดูแล / module_admin / superadmin ไว้ตรงนี้
+
     st.markdown("---")
 
+    
     # ---------- Theme CSS ----------
     st.markdown(
         """
