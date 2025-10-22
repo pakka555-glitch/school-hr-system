@@ -1,211 +1,249 @@
+# -*- coding: utf-8 -*-
 import os
 from datetime import datetime
 import streamlit as st
 
-# ------------------------------------
-# Settings & Branding
-# ------------------------------------
-APP_TITLE = "ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่"
-CONTACT_EMAIL = "pakka555@gmail.com"  # ครูสุพจน์
-BRAND_PRIMARY = "#0a2342"             # น้ำเงินกรมท่า
-BRAND_MUTED = "#4f5b66"               # เทาเข้มอ่านง่าย
+# -------------------------------------------------
+# ⚙️ ตั้งค่าหน้าจอ (ต้องอยู่ด้านบนสุดก่อนมี UI ใดๆ)
+# -------------------------------------------------
+st.set_page_config(
+    page_title="ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่",
+    page_icon="🌸",
+    layout="wide",
+)
 
-# ใช้ session_state เพื่อสลับหน้า (ให้ปุ่มบนการ์ดพาไปเมนูได้)
+# -------------------------------------------------
+# Settings & Branding
+# -------------------------------------------------
+APP_TITLE      = "ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่"
+CONTACT_EMAIL  = "pakka555@gmail.com"  # ครูสุพจน์
+BRAND_PRIMARY  = "#0a2342"             # น้ำเงินกรมท่า
+BRAND_MUTED    = "#4f5b66"             # เทาน้ำเงิน
+
+# ใช้ session_state เพื่อจำหน้า (ไม่เปลี่ยนเองตอนกลับมา)
 if "menu" not in st.session_state:
     st.session_state["menu"] = "หน้าแรก"
 
-# ------------------------------------
-# Helper: โหลดฟอนต์ Google
-# ------------------------------------
-# ---------- สีหลักที่ใช้ทั่วเว็บ ----------
-BRAND_PRIMARY = "#0a2342"   # น้ำเงินเข้ม
-BRAND_MUTED   = "#445b66"   # เทาอมฟ้า
+# -------------------------------------------------
+# Helper: path รูปในโฟลเดอร์ assets
+# -------------------------------------------------
+def asset(name: str) -> str:
+    return os.path.join("assets", name)
 
+# -------------------------------------------------
+# โหลดฟอนต์ + CSS (เรียกหนึ่งครั้งทุกหน้า)
+# -------------------------------------------------
 def inject_fonts_and_css():
     st.markdown(
-        """
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+        f"""
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-<style>
-  :root{
-    --brand:#0a2342;          /* น้ำเงินเข้ม (หัวข้อ/ปุ่ม) */
-    --brand-2:#0d3b66;        /* น้ำเงินรอง */
-    --text:#1a2b3b;
-    --muted:#445b66;
-    --line:#e6eef7;
-    --card:#ffffff;
-    --bg:#f6f9fc;
-  }
+        <style>
+            :root {{
+                --brand: {BRAND_PRIMARY};
+                --muted: {BRAND_MUTED};
+            }}
 
-  html, body, [class^="css"] {
-    font-family: "Noto Sans Thai", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-  }
+            html, body, [class*="css"] {{
+                font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+                color: #14202e;
+            }}
 
-  /* ให้พื้นที่ดูโปร่ง */
-  .block-container { padding-top: 1.6rem; }
+            /* กำหนดความกว้างคอนเทนเนอร์หลัก */
+            .block-container {{
+                max-width: 1320px;
+                padding-top: 1.0rem !important;
+                padding-bottom: 1.0rem !important;
+            }}
 
-  /* ========= HEADER (โลโก้ + ชื่อระบบ) ========= */
-  .kys-hero{
-    display:flex; gap:18px; align-items:center;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:16px 20px;
-    box-shadow: 0 4px 14px rgba(10,35,66,.06);
-    margin: 10px 0 6px 0;
-  }
-  .kys-hero img.kys-logo{
-    width:96px;height:96px; object-fit:cover; border-radius:12px;
-  }
-  .kys-hero .kys-title h1{
-    margin:0; font-size:40px; font-weight:700; color:var(--brand);
-  }
-  .kys-hero .kys-title p{
-    margin:4px 0 0; color:var(--muted); font-size:17px;
-  }
+            /* แบนเนอร์ / โลโก้ */
+            .kys-banner img {{
+                border-radius: 16px;
+                box-shadow: 0 6px 20px rgba(0,0,0,.08);
+            }}
+            .kys-logo {{
+                border-radius: 14px;
+                width: 120px;
+                height: 120px;
+                object-fit: cover;
+                border: 4px solid #fff;
+                box-shadow: 0 4px 14px rgba(0,0,0,.12);
+            }}
 
-  /* ========= BANNER ========= */
-  .kys-banner{ border-radius:16px; overflow:hidden; box-shadow:0 6px 20px rgba(10,35,66,.08); }
+            /* ส่วนหัวใหญ่ */
+            .kys-hero h1 {{
+                font-size: 36px;
+                font-weight: 800;
+                line-height: 1.25;
+                margin: 0 0 .35rem 0;
+                color: var(--brand);
+            }}
+            .kys-hero p {{
+                color: var(--muted);
+                margin: 0 0 .6rem 0;
+            }}
 
-  /* ========= GRID การ์ด ========= */
-  .kys-grid{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 22px;
-  }
-  .kys-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:18px 18px 14px 18px;
-    box-shadow:0 4px 14px rgba(10,35,66,.06);
-    min-height: 360px;
-    display:flex; flex-direction:column;
-  }
-  .kys-card h3{
-    margin:0 0 2px 0; font-size:22px; color:var(--brand)
-  }
-  .kys-card .sub{
-    margin:0 0 12px 0; font-weight:600; color:var(--muted)
-  }
-  .kys-card ul{ margin:0 0 14px 18px; color:var(--text) }
-  .kys-card li{ margin:6px 0 }
+            /* การ์ดบทบาท + ปุ่มล่างเสมอ */
+            .kys-card {{
+                background: #fff;
+                border: 1px solid #eaf0f6;
+                border-radius: 16px;
+                padding: 22px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                height: 100%;
+                box-shadow: 0 6px 16px rgba(10,35,66,.04);
+            }}
+            .kys-card h3 {{
+                margin: 0 0 6px 0;
+                color: var(--brand);
+                font-weight: 800;
+            }}
+            .kys-card h4 {{
+                margin: 0 0 8px 0;
+                color: #0e2a47;
+                font-weight: 700;
+            }}
+            .kys-card ul {{
+                margin: 0 0 8px 16px;
+            }}
+            .kys-spacer {{
+                flex: 1;
+            }}
 
-  .kys-grow{ flex:1 } /* ดันปุ่มลงล่าง */
+            /* ปุ่มหลัก */
+            .kys-btn {{
+                display: inline-flex;
+                align-items: center;
+                gap: .6rem;
+                border: none;
+                color: #fff !important;
+                background: var(--brand);
+                padding: 10px 14px;
+                border-radius: 10px;
+                text-decoration: none !important;
+                box-shadow: 0 6px 14px rgba(10,35,66,.18);
+                font-weight: 700;
+            }}
+            .kys-btn:hover {{
+                filter: brightness(1.05);
+            }}
 
-  .kys-btn{
-    display:inline-flex; align-items:center; gap:8px;
-    background:var(--brand-2); color:#fff; text-decoration:none;
-    padding:10px 16px; border-radius:12px; font-weight:700;
-    box-shadow:0 6px 16px rgba(13,59,102,.18);
-    transition:.15s ease-in-out;
-  }
-  .kys-btn:hover{ filter:brightness(1.02); transform: translateY(-1px); }
+            /* ปุ่มรอง */
+            .kys-btn.secondary {{
+                background: #1b3b6f;
+            }}
 
-  .kys-btn-secondary{
-    background:#0a234233; color:var(--brand-2);
-    box-shadow:none;
-  }
-
-  /* ========= เส้นคั่น ========= */
-  .kys-hr { border-top:1px solid var(--line); margin: 18px 0 8px 0; }
-
-  /* ========= Footer ขวา ========= */
-  .kys-footer{
-    text-align:right; color:var(--muted); margin-top:18px;
-  }
-</style>
+            /* footer ขวา */
+            .kys-footer {{
+                display: flex;
+                justify-content: flex-end;
+                color: #6b7785;
+                font-size: 14px;
+                margin-top: 16px;
+            }}
+        </style>
         """,
         unsafe_allow_html=True,
     )
 
-# ------------------------------------
-# หน้าแรก
-# ------------------------------------
+
+# -------------------------------------------------
+# หน้า: หน้าแรก (Home)
+# -------------------------------------------------
 def show_home():
-    import os
     inject_fonts_and_css()
 
-    # 1) Banner ด้านบน (แสดงเมื่อมีไฟล์)
-    if os.path.exists("assets/banner.jpg"):
+    # 1) Banner (ถ้ามีไฟล์)
+    if os.path.exists(asset("banner.jpg")):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
-        st.image("assets/banner.jpg", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.image(asset("banner.jpg"), use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.write("")  # spacing
 
-    # 2) โลโก้ซ้าย + ชื่อระบบขวา
+    # 2) Logo + Title
+    col_logo, col_title = st.columns([1, 4], vertical_alignment="center")
+    with col_logo:
+        if os.path.exists(asset("logo.jpg")):
+            st.image(asset("logo.jpg"), caption=None, width=120, output_format="auto", use_column_width=False, clamp=False)
+    with col_title:
+        st.markdown(
+            f"""
+            <div class="kys-hero">
+                <h1>{APP_TITLE}</h1>
+                <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # 3) บทบาท 3 การ์ด
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.markdown(
+            """
+            <div class="kys-card">
+                <h3>👩‍🏫 สำหรับครูผู้สอน</h3>
+                <h4>Teacher</h4>
+                <ul>
+                    <li>จัดการ/ปรับปรุงข้อมูลส่วนบุคคล</li>
+                    <li>ส่งคำขอ (ลา/ไปราชการ/อบรม ฯลฯ) และตรวจสอบสถานะ</li>
+                    <li>อัปโหลดเอกสารงานบุคคล (ฟอร์ม/ใบอนุญาต/แฟ้มสะสม)</li>
+                </ul>
+                <div class="kys-spacer"></div>
+                <a class="kys-btn" href="#ครูเข้าสู่ระบบ">🔐 เข้าสู่ระบบครู</a>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with c2:
+        st.markdown(
+            """
+            <div class="kys-card">
+                <h3>⚙️ ผู้ดูแลโมดูล</h3>
+                <h4>Module Admin</h4>
+                <ul>
+                    <li>ตรวจสอบ/อนุมัติคำขอในโมดูลที่รับผิดชอบ</li>
+                    <li>ติดตามเอกสาร ปรับแก้ข้อมูลที่จำเป็น</li>
+                    <li>ดูสรุปสถิติและรายงานในโมดูล</li>
+                </ul>
+                <div class="kys-spacer"></div>
+                <a class="kys-btn secondary" href="#ผู้ดูแลโมดูลเข้าสู่ระบบ">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with c3:
+        st.markdown(
+            """
+            <div class="kys-card">
+                <h3>🛡️ แอดมินใหญ่</h3>
+                <h4>Superadmin</h4>
+                <ul>
+                    <li>กำกับดูแลภาพรวมของระบบทั้งหมด</li>
+                    <li>จัดการข้อมูลบุคลากร/สิทธิ์การเข้าใช้</li>
+                    <li>ออกรายงานภาพรวมเพื่อการบริหาร</li>
+                </ul>
+                <div class="kys-spacer"></div>
+                <a class="kys-btn" href="#แอดมินใหญ่เข้าสู่ระบบ">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.write("")
+    # ปุ่มติดต่อผู้ดูแลระบบ
     st.markdown(
         f"""
-        <div class="kys-hero">
-          <img src="assets/logo.jpg" class="kys-logo" />
-          <div class="kys-title">
-            <h1>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h1>
-            <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้</p>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<div class="kys-hr"></div>', unsafe_allow_html=True)
-
-    # 3) การ์ด 3 ใบ (สูงเท่ากัน ปุ่มอยู่ล่างเสมอ)
-    st.markdown(
-        """
-<div class="kys-grid">
-
-  <!-- ครูผู้สอน -->
-  <div class="kys-card">
-    <h3>🧑‍🏫 สำหรับครูผู้สอน</h3>
-    <div class="sub">Teacher</div>
-    <ul>
-      <li>จัดการ/ปรับปรุงข้อมูลส่วนบุคคล</li>
-      <li>ส่งคำขอ (ลา/ใบราชการ/อบรม ฯลฯ) และตรวจสอบสถานะ</li>
-      <li>อัปโหลดเอกสารงานบุคคล (ฟอร์ม/ใบอนุญาต/แฟ้มสะสมงาน)</li>
-    </ul>
-    <div class="kys-grow"></div>
-    <a class="kys-btn" href="#">🔐 เข้าสู่ระบบครู</a>
-  </div>
-
-  <!-- ผู้ดูแลโมดูล -->
-  <div class="kys-card">
-    <h3>✴ ผู้ดูแลโมดูล</h3>
-    <div class="sub">Module Admin</div>
-    <ul>
-      <li>ตรวจสอบ/อนุมัติคำขอในโมดูลที่รับผิดชอบ</li>
-      <li>ติดตามเอกสาร ปรับแก้ข้อมูลที่จำเป็น</li>
-      <li>ดูสถิติและรายงานในโมดูล</li>
-    </ul>
-    <div class="kys-grow"></div>
-    <a class="kys-btn" href="#">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
-  </div>
-
-  <!-- แอดมินใหญ่ -->
-  <div class="kys-card">
-    <h3>🛡 แอดมินใหญ่</h3>
-    <div class="sub">Superadmin</div>
-    <ul>
-      <li>กำกับดูแลงานภาพรวมของระบบทั้งหมด</li>
-      <li>จัดการข้อมูลบุคลากร/สิทธิ์การเข้าใช้</li>
-      <li>ออกรายงานภาพรวมเพื่อการบริหาร</li>
-    </ul>
-    <div class="kys-grow"></div>
-    <a class="kys-btn" href="#">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
-  </div>
-
-</div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # ปุ่มติดต่อผู้ดูแล (ซ้าย)
-    st.markdown(
-        """
-<div style="margin-top:16px;">
-  <a class="kys-btn kys-btn-secondary" href="mailto:pakka555@gmail.com">✉️ ติดต่อผู้ดูแลระบบ</a>
-</div>
+        <a class="kys-btn" href="mailto:{CONTACT_EMAIL}">✉️ ติดต่อผู้ดูแลระบบ</a>
         """,
         unsafe_allow_html=True,
     )
@@ -213,31 +251,41 @@ def show_home():
     # Footer ขวา
     st.markdown(
         """
-<div class="kys-footer">
-  พัฒนาโดย กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด
-</div>
+        <div class="kys-footer">
+          พัฒนาโดย กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-# ------------------------------------
-# Placeholder สำหรับหน้าอื่น
-# ------------------------------------
+
+# -------------------------------------------------
+# ตัวอย่างหน้า: สำหรับผู้ใช้ (ครู)
+# -------------------------------------------------
 def show_teacher_portal():
-    st.subheader("เข้าสู่ระบบผู้ใช้ (ครู)")
-    st.info("ใส่ฟอร์มล็อกอิน (Teacher ID + PIN) หรือเมนูย่อยต่าง ๆ ได้ที่นี่")
-    st.markdown("- ตัวอย่าง: แบบฟอร์มคำขอลา, อัปโหลดเอกสาร, ตรวจสอบสถานะ ฯลฯ")
+    inject_fonts_and_css()
+    st.markdown("### 👩‍🏫 เข้าสู่ระบบผู้ใช้ (ครู)")
+    tid = st.text_input("Teacher ID")
+    pin = st.text_input("PIN", type="password")
+    if st.button("เข้าสู่ระบบ"):
+        st.success("เข้าสู่ระบบสำเร็จ (ตัวอย่างหน้า)")
 
+# -------------------------------------------------
+# ตัวอย่างหน้า: สำหรับผู้ดูแล (module / superadmin)
+# -------------------------------------------------
 def show_admin_portal():
-    st.subheader("เข้าสู่ระบบผู้ดูแล")
-    st.info("ใส่ฟอร์มล็อกอิน/เมนูของ module_admin / superadmin ได้ที่นี่")
-    st.markdown("- ตัวอย่าง: อนุมัติคำขอ, จัดการสิทธิ์, รายงานภาพรวม ฯลฯ")
+    inject_fonts_and_css()
+    st.markdown("### 🛡️ เข้าสู่ระบบผู้ดูแล")
+    uid = st.text_input("Admin ID")
+    pin = st.text_input("PIN", type="password")
+    if st.button("เข้าสู่ระบบผู้ดูแล"):
+        st.success("เข้าสู่ระบบผู้ดูแลสำเร็จ (ตัวอย่างหน้า)")
 
 
-# ------------------------------------
-# Layout: Sidebar + Routing
-# ------------------------------------
-inject_fonts_and_css()  # ให้ฟอนต์ใช้ได้ทุกหน้า
+# -------------------------------------------------
+# Sidebar + Routing
+# -------------------------------------------------
+inject_fonts_and_css()  # ให้ฟอนต์/ธีมใช้ได้ทุกหน้า
 
 with st.sidebar:
     st.markdown("### เมนู")
@@ -247,6 +295,7 @@ with st.sidebar:
         index=["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล"].index(st.session_state["menu"])
     )
 
+# Router
 if st.session_state["menu"] == "หน้าแรก":
     show_home()
 elif st.session_state["menu"] == "สำหรับผู้ใช้":
