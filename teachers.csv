@@ -1,6 +1,7 @@
 teacher_id,name,email,department,pin,role,admin_modules
-T001,ครูเอ,ae@example.com,ประถม,123456,teacher,
-T002,ครูบี,bee@example.com,ประถม,234567,teacher,
-T999,หัวหน้าบุคคล,hrhead@example.com,บุคคล,999999,superadmin,
-T100,แอดมิน-ลา,leaveadmin@example.com,บุคคล,111111,module_admin,leave,offsite
-T101,แอดมิน-PA,paadmin@example.com,บุคคล,222222,module_admin,pa
+T001,ครูA,ae@example.com,ประถม,123456,teacher,
+T002,ครูB,bee@example.com,มัธยม,234567,teacher,
+T999,หัวหน้าบุคคล,hrhead@example.com,บุคล,999999,superadmin,
+T100,แอดมิน-ลา,leaveadmin@example.com,บุคล,111111,module_admin,"leave,offsite"
+T101,แอดมิน-PA,paadmin@example.com,บุคล,222222,module_admin,pa
+
