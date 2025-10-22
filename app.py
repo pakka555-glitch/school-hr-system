@@ -1,6 +1,4 @@
 import os
-import base64
-import pandas as pd
 import streamlit as st
 
 # ==============================
@@ -13,9 +11,6 @@ BRAND_MUTED = "#445b66"              # เทาอมฟ้า
 
 ASSETS_DIR = "assets"
 BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")
-
-if "menu" not in st.session_state:
-    st.session_state["menu"] = "หน้าแรก"
 
 # ==============================
 # Load Google Font + Global CSS
@@ -32,7 +27,6 @@ def inject_fonts_and_css():
             --brand: {BRAND_PRIMARY};
             --muted: {BRAND_MUTED};
             --bg-card: #ffffff;
-            --bg-soft: #f5f8fb;
             --shadow: 0 10px 30px rgba(10,35,66,0.08);
             --radius: 14px;
           }}
@@ -40,7 +34,6 @@ def inject_fonts_and_css():
           html, body, [class*="css"] {{
             font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
           }}
-
           .block-container {{ max-width: 1240px !important; }}
 
           /* Banner */
@@ -63,15 +56,15 @@ def inject_fonts_and_css():
             color: var(--muted);
           }}
 
-          /* Grid การ์ด */
+          /* Grid การ์ด — 3 ใบเรียงแนวนอน */
           .kys-grid {{
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(320px, 1fr));
             gap: 26px;
             margin-top: 14px;
           }}
-          @media (max-width: 1100px) {{
-            .kys-grid {{ grid-template-columns: repeat(2, 1fr); }}
+          @media (max-width: 1200px) {{
+            .kys-grid {{ grid-template-columns: repeat(2, minmax(320px, 1fr)); }}
           }}
           @media (max-width: 760px) {{
             .kys-grid {{ grid-template-columns: 1fr; }}
@@ -85,7 +78,7 @@ def inject_fonts_and_css():
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 340px;
+            min-height: 360px;
           }}
           .kys-card h3 {{
             margin: 0 0 6px 0;
@@ -103,7 +96,7 @@ def inject_fonts_and_css():
             line-height: 1.6;
           }}
 
-          /* ปุ่มสวยแบบ custom */
+          /* ปุ่มสวย */
           .kys-actions {{ margin-top: auto; display: flex; }}
           .kys-btn {{
             display: inline-flex;
@@ -125,6 +118,7 @@ def inject_fonts_and_css():
             filter: brightness(1.06);
             transform: translateY(-1px);
           }}
+
           /* ปุ่มติดต่อผู้ดูแล */
           .kys-contact {{
             width: 100%;
@@ -149,7 +143,7 @@ def inject_fonts_and_css():
     )
 
 # ==============================
-# Home Page
+# หน้าแรก
 # ==============================
 def show_home():
     inject_fonts_and_css()
@@ -173,9 +167,10 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # Grid การ์ด
+    # การ์ด 3 ใบ
     st.markdown('<div class="kys-grid">', unsafe_allow_html=True)
 
+    # การ์ดครู
     st.markdown("""
       <div class="kys-card">
         <div>
@@ -188,11 +183,12 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_teacher">🔐 เข้าสู่ระบบครู</a>
+          <a class="kys-btn" href="?menu=สำหรับผู้ใช้">🔐 เข้าสู่ระบบครู</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
 
+    # การ์ดผู้ดูแลโมดูล
     st.markdown("""
       <div class="kys-card">
         <div>
@@ -205,11 +201,12 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_module_admin">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
+          <a class="kys-btn" href="?menu=สำหรับผู้ดูแล">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
 
+    # การ์ดแอดมินใหญ่
     st.markdown("""
       <div class="kys-card">
         <div>
@@ -222,14 +219,14 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_superadmin">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
+          <a class="kys-btn" href="?menu=สำหรับผู้ดูแล">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Footer
+    # ปุ่มติดต่อ + Footer
     st.markdown(f"""
       <div class="kys-contact">
         <a href="mailto:{CONTACT_EMAIL}">📧 ติดต่อผู้ดูแลระบบ</a>
@@ -242,7 +239,7 @@ def show_home():
     """, unsafe_allow_html=True)
 
 # ==============================
-# Main App
+# Main
 # ==============================
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
@@ -250,4 +247,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
