@@ -1,5 +1,4 @@
 import os
-import base64
 import pandas as pd
 import streamlit as st
 
@@ -13,9 +12,56 @@ BRAND_MUTED = "#445b66"              # เทาอมฟ้า
 
 ASSETS_DIR = "assets"
 BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")
+DATA_PATH = "teachers.csv"           # ไฟล์บัญชีผู้ใช้
 
-if "menu" not in st.session_state:
-    st.session_state["menu"] = "หน้าแรก"
+# ==============================
+# Utils: Query params (รองรับทั้ง API เก่า/ใหม่)
+# ==============================
+def get_qp():
+    try:
+        return dict(st.query_params)
+    except Exception:
+        return st.experimental_get_query_params()
+
+def set_qp(**kwargs):
+    try:
+        st.query_params.clear()
+        st.query_params.update(kwargs)
+    except Exception:
+        st.experimental_set_query_params(**kwargs)
+
+# ==============================
+# Auth helpers (load users, check pin)
+# ==============================
+def load_users():
+    """อ่าน users จาก teachers.csv -> DataFrame"""
+    try:
+        df = pd.read_csv(DATA_PATH, dtype=str).fillna("")
+        required = {"teacher_id","name","email","department","pin","role","admin_modules"}
+        missing = required - set(df.columns)
+        if missing:
+            st.error(f"teachers.csv ไม่มีคอลัมน์: {', '.join(missing)}")
+        return df
+    except Exception as e:
+        st.error(f"อ่านไฟล์ users ไม่ได้: {e}")
+        return pd.DataFrame(columns=["teacher_id","name","email","department","pin","role","admin_modules"])
+
+def get_user(tid: str):
+    df = load_users()
+    m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
+    return m.iloc[0].to_dict() if not m.empty else None
+
+def check_login(tid: str, pin: str):
+    """คืน (bool,user_dict|None, error_text|None)"""
+    if not tid or not pin:
+        return False, None, "กรุณากรอกให้ครบ"
+
+    u = get_user(tid)
+    if not u:
+        return False, None, "ไม่พบรหัสผู้ใช้"
+    if str(u["pin"]).strip() != str(pin).strip():
+        return False, None, "PIN ไม่ถูกต้อง"
+    return True, u, None
 
 # ==============================
 # Load Google Font + Global CSS
@@ -32,7 +78,6 @@ def inject_fonts_and_css():
             --brand: {BRAND_PRIMARY};
             --muted: {BRAND_MUTED};
             --bg-card: #ffffff;
-            --bg-soft: #f5f8fb;
             --shadow: 0 10px 30px rgba(10,35,66,0.08);
             --radius: 14px;
           }}
@@ -40,7 +85,6 @@ def inject_fonts_and_css():
           html, body, [class*="css"] {{
             font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
           }}
-
           .block-container {{ max-width: 1240px !important; }}
 
           /* Banner */
@@ -63,15 +107,15 @@ def inject_fonts_and_css():
             color: var(--muted);
           }}
 
-          /* Grid การ์ด */
+          /* Grid การ์ด — 3 ใบเรียงแนวนอน */
           .kys-grid {{
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(320px, 1fr));
             gap: 26px;
             margin-top: 14px;
           }}
-          @media (max-width: 1100px) {{
-            .kys-grid {{ grid-template-columns: repeat(2, 1fr); }}
+          @media (max-width: 1200px) {{
+            .kys-grid {{ grid-template-columns: repeat(2, minmax(320px, 1fr)); }}
           }}
           @media (max-width: 760px) {{
             .kys-grid {{ grid-template-columns: 1fr; }}
@@ -85,7 +129,7 @@ def inject_fonts_and_css():
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 340px;
+            min-height: 360px;
           }}
           .kys-card h3 {{
             margin: 0 0 6px 0;
@@ -103,7 +147,7 @@ def inject_fonts_and_css():
             line-height: 1.6;
           }}
 
-          /* ปุ่มสวยแบบ custom */
+          /* ปุ่มสวย */
           .kys-actions {{ margin-top: auto; display: flex; }}
           .kys-btn {{
             display: inline-flex;
@@ -125,6 +169,7 @@ def inject_fonts_and_css():
             filter: brightness(1.06);
             transform: translateY(-1px);
           }}
+
           /* ปุ่มติดต่อผู้ดูแล */
           .kys-contact {{
             width: 100%;
@@ -143,24 +188,28 @@ def inject_fonts_and_css():
             text-decoration: none;
             box-shadow: var(--shadow);
           }}
+
+          /* กล่องฟอร์ม */
+          .kys-form {{
+            background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+            padding: 22px; margin-top: 16px;
+          }}
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 # ==============================
-# Home Page
+# Pages
 # ==============================
 def show_home():
     inject_fonts_and_css()
 
-    # Banner
     if os.path.exists(BANNER_PATH):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Title
     st.markdown(
         f"""
         <div class="kys-title" style="text-align:center; margin-top:10px;">
@@ -173,7 +222,6 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # Grid การ์ด
     st.markdown('<div class="kys-grid">', unsafe_allow_html=True)
 
     st.markdown("""
@@ -188,7 +236,7 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_teacher">🔐 เข้าสู่ระบบครู</a>
+          <a class="kys-btn" href="?page=login_teacher">🔐 เข้าสู่ระบบครู</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
@@ -205,7 +253,7 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_module_admin">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
+          <a class="kys-btn" href="?page=login_module">🔐 เข้าสู่ระบบผู้ดูแลโมดูล</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
@@ -222,14 +270,13 @@ def show_home():
           </ul>
         </div>
         <div class="kys-actions">
-          <a class="kys-btn" href="?route=login_superadmin">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
+          <a class="kys-btn" href="?page=login_super">🔐 เข้าสู่ระบบแอดมินใหญ่</a>
         </div>
       </div>
     """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Footer
     st.markdown(f"""
       <div class="kys-contact">
         <a href="mailto:{CONTACT_EMAIL}">📧 ติดต่อผู้ดูแลระบบ</a>
@@ -241,12 +288,99 @@ def show_home():
       </div>
     """, unsafe_allow_html=True)
 
+# ---------- Login Pages ----------
+def show_login(role_key: str, title: str, allow_roles: list, success_target: str):
+    """หน้าล็อกอินร่วม: role_key -> teacher|module|super"""
+    inject_fonts_and_css()
+
+    st.markdown(f"<h2>🔐 เข้าสู่ระบบ: {title}</h2>", unsafe_allow_html=True)
+    st.markdown('<div class="kys-form">', unsafe_allow_html=True)
+    with st.form(f"form_login_{role_key}"):
+        tid = st.text_input("User / Teacher ID")
+        pin = st.text_input("PIN", type="password")
+        okbtn = st.form_submit_button("เข้าสู่ระบบ")
+
+        if okbtn:
+            ok, u, err = check_login(tid, pin)
+            if not ok:
+                st.error(err)
+            else:
+                role = u.get("role","").strip().lower()
+                if role in [r.lower() for r in allow_roles]:
+                    st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
+                    st.session_state["user"] = u
+                    set_qp(page=success_target)  # redirect
+                    st.rerun()
+                else:
+                    st.error("สิทธิ์ไม่พอสำหรับเมนูนี้")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<br>', unsafe_allow_html=True)
+    st.link_button("← กลับหน้าแรก", "?page=home")
+
+# ---------- Dashboards ----------
+def show_dashboard(title: str, required_roles: list):
+    inject_fonts_and_css()
+    user = st.session_state.get("user")
+    if not user:
+        st.warning("กรุณาเข้าสู่ระบบก่อน")
+        st.link_button("ไปยังหน้าแรก", "?page=home")
+        return
+    if user.get("role","").strip().lower() not in [r.lower() for r in required_roles]:
+        st.error("สิทธิ์ไม่พอสำหรับหน้าแดชบอร์ดนี้")
+        st.link_button("กลับหน้าแรก", "?page=home")
+        return
+
+    st.markdown(f"<h2>📊 {title}</h2>", unsafe_allow_html=True)
+    st.info(
+        f"สวัสดีคุณ **{user.get('name','')}**  "
+        f"บทบาท: **{user.get('role','').title()}**  | แผนก: **{user.get('department','')}**"
+    )
+    st.success("พื้นที่นี้ไว้ต่อยอดเมนู/ฟอร์มการทำงานจริงในเฟสถัดไป")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.link_button("🏠 กลับหน้าแรก", "?page=home")
+    with col2:
+        if st.button("🚪 ออกจากระบบ", use_container_width=True):
+            st.session_state.pop("user", None)
+            set_qp(page="home")
+            st.rerun()
+
 # ==============================
-# Main App
+# Router
+# ==============================
+def route():
+    qp = get_qp()
+    page = (qp.get("page") or qp.get("page", ["home"]))  # compatibility for old API list return
+    if isinstance(page, list):
+        page = page[0] if page else "home"
+    page = page or "home"
+
+    if page == "home":
+        show_home()
+    elif page == "login_teacher":
+        show_login("teacher", "ครูผู้สอน", ["teacher","module_admin","superadmin"], "dashboard_teacher")
+    elif page == "login_module":
+        show_login("module", "ผู้ดูแลโมดูล", ["module_admin","superadmin"], "dashboard_module")
+    elif page == "login_super":
+        show_login("super", "แอดมินใหญ่", ["superadmin"], "dashboard_super")
+    elif page == "dashboard_teacher":
+        show_dashboard("แดชบอร์ดครูผู้สอน", ["teacher","module_admin","superadmin"])
+    elif page == "dashboard_module":
+        show_dashboard("แดชบอร์ดผู้ดูแลโมดูล", ["module_admin","superadmin"])
+    elif page == "dashboard_super":
+        show_dashboard("แดชบอร์ดแอดมินใหญ่", ["superadmin"])
+    else:
+        set_qp(page="home")
+        show_home()
+
+# ==============================
+# Main
 # ==============================
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
-    show_home()
+    route()
 
 if __name__ == "__main__":
     main()
