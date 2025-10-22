@@ -1,4 +1,5 @@
 import os
+import base64
 import streamlit as st
 
 # ==============================
@@ -40,11 +41,7 @@ def inject_fonts_and_css():
           html, body, [class*="css"] {
             font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
           }
-
-          /* ขยายความกว้างคอนเทนต์หลักให้ดูโปร่งสบาย */
-          .block-container {
-            max-width: 1240px !important;
-          }
+          .block-container { max-width: 1240px !important; }
 
           /* Banner */
           .kys-banner {
@@ -65,9 +62,7 @@ def inject_fonts_and_css():
           .kys-title h1{
             margin:0; font-size: clamp(28px, 2.6vw, 38px); color: var(--brand); font-weight:800;
           }
-          .kys-title p{
-            margin:6px 0 0 0; color: var(--muted);
-          }
+          .kys-title p{ margin:6px 0 0 0; color: var(--muted); }
 
           /* Grid 3 การ์ด */
           .kys-grid{
@@ -76,12 +71,8 @@ def inject_fonts_and_css():
             gap: 26px;
             margin-top:14px;
           }
-          @media (max-width: 1100px){
-            .kys-grid{ grid-template-columns: repeat(2, 1fr); }
-          }
-          @media (max-width: 760px){
-            .kys-grid{ grid-template-columns: 1fr; }
-          }
+          @media (max-width: 1100px){ .kys-grid{ grid-template-columns: repeat(2, 1fr); } }
+          @media (max-width: 760px){ .kys-grid{ grid-template-columns: 1fr; } }
 
           .kys-card{
             background: var(--bg-card);
@@ -93,44 +84,25 @@ def inject_fonts_and_css():
             min-height: 320px;
           }
           .kys-card > div { flex:1; }
-
-          .kys-card h3{
-            margin:0 0 6px 0; font-weight:800; color: var(--brand);
-          }
-          .kys-card h4{
-            margin:0 0 10px 0; font-weight:600; color: var(--muted);
-          }
-          .kys-card ul{
-            margin: 8px 0 0 18px; color:#314657; line-height:1.6;
-          }
+          .kys-card h3{ margin:0 0 6px 0; font-weight:800; color: var(--brand); }
+          .kys-card h4{ margin:0 0 10px 0; font-weight:600; color: var(--muted); }
+          .kys-card ul{ margin: 8px 0 0 18px; color:#314657; line-height:1.6; }
 
           /* ปุ่มอยู่ด้านล่างให้เสมอกันทุกใบ */
           .kys-btn{
             display:inline-flex; align-items:center; justify-content:center;
-            gap:8px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background: var(--brand);
-            color:#fff !important;
-            text-decoration:none !important;
-            box-shadow: var(--shadow);
-            margin-top: 14px;
-            min-height: 48px;
+            gap:8px; padding: 12px 16px; border-radius: 12px;
+            background: var(--brand); color:#fff !important; text-decoration:none !important;
+            box-shadow: var(--shadow); margin-top: 14px; min-height: 48px;
           }
           .kys-btn:hover{ filter:brightness(1.06); }
 
           /* ปุ่มติดต่อผู้ดูแล (ลอยอยู่ขวาล่างหน้าแรก) */
-          .kys-contact{
-            width:100%; display:flex; justify-content:flex-end; margin-top:18px;
-          }
+          .kys-contact{ width:100%; display:flex; justify-content:flex-end; margin-top:18px; }
           .kys-contact a{
-            display:inline-flex; align-items:center; gap:8px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: #0f2748;
-            color: #fff !important;
-            text-decoration:none;
-            box-shadow: var(--shadow);
+            display:inline-flex; align-items:center; gap:8px; padding: 10px 14px;
+            border-radius: 999px; background: #0f2748; color: #fff !important;
+            text-decoration:none; box-shadow: var(--shadow);
           }
         </style>
         """,
@@ -150,38 +122,30 @@ def show_home():
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2) Title + Logo + Subtitle
-import base64
-
-# --- Logo + Title ---
-st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
-
-# ✅ โหลดโลโก้แบบ Base64 (ไม่ต้องพึ่ง path)
-if os.path.exists(LOGO_PATH):
-    with open(LOGO_PATH, "rb") as f:
-        logo_data = f.read()
-        logo_base64 = base64.b64encode(logo_data).decode("utf-8")
+    # 2) Title + Logo + Subtitle  (Base64 logo)
+    st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
+    if os.path.exists(LOGO_PATH):
+        with open(LOGO_PATH, "rb") as f:
+            logo_base64 = base64.b64encode(f.read()).decode("utf-8")
         st.markdown(
             f'<img class="kys-logo" src="data:image/jpeg;base64,{logo_base64}"/>',
             unsafe_allow_html=True,
         )
-else:
+    else:
+        st.markdown(
+            '<div class="kys-logo" style="background:#ddd;display:flex;align-items:center;justify-content:center;">❌</div>',
+            unsafe_allow_html=True,
+        )
     st.markdown(
-        '<div class="kys-logo" style="background:#ddd;display:flex;align-items:center;justify-content:center;">❌</div>',
+        f"""
+        <div class="kys-title">
+          <h1>{APP_TITLE}</h1>
+          <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-
-st.markdown(
-    f"""
-    <div class="kys-title">
-      <h1>{APP_TITLE}</h1>
-      <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-st.markdown("</div>", unsafe_allow_html=True)
-
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # 3) การ์ด 3 ใบ
     st.markdown(
@@ -254,6 +218,7 @@ st.markdown("</div>", unsafe_allow_html=True)
         unsafe_allow_html=True,
     )
 
+
 def show_teacher_portal():
     inject_fonts_and_css()
     st.title("พื้นที่สำหรับผู้ใช้ (ครู)")
@@ -271,7 +236,6 @@ def show_admin_portal():
 # ==============================
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
-
     with st.sidebar:
         st.markdown("### เมนู")
         st.session_state["menu"] = st.radio(
@@ -291,3 +255,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
