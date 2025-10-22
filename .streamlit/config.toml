@@ -1,6 +1,6 @@
 [theme]
 base="light"
-primaryColor="#0ea5e9"
+primaryColor="#0a2342"      # น้ำเงินกรมท่า
 backgroundColor="#ffffff"
-secondaryBackgroundColor="#f8fafc"
-textColor="#0f172a"
+secondaryBackgroundColor="#f7f9fc"
+textColor="#0a2342"
