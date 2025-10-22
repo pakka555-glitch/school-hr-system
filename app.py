@@ -1,5 +1,6 @@
 import os
 import base64
+import pandas as pd
 import streamlit as st
 
 # ==============================
@@ -14,17 +15,17 @@ ASSETS_DIR = "assets"
 BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")
 LOGO_PATH   = os.path.join(ASSETS_DIR, "logo.jpg")
 
-# init session_state for routing (เปิดครั้งแรกให้ไปหน้าแรก)
+# init session_state
 if "menu" not in st.session_state:
     st.session_state["menu"] = "หน้าแรก"
-
-
+if "route" not in st.session_state:
+    st.session_state["route"] = "home"   # เส้นทางย่อย (ใช้สำหรับหน้า login)
+if "user" not in st.session_state:
+    st.session_state["user"] = None
 
 # ------------------------------
 # Auth helpers (load users, check pin)
 # ------------------------------
-import pandas as pd
-
 DATA_PATH = "teachers.csv"   # ไฟล์บัญชีผู้ใช้
 
 def load_users():
@@ -89,17 +90,8 @@ def inject_fonts_and_css():
             margin: 6px 0 18px 0;
           }
 
-          /* ส่วนหัว Title/Subtitle & โลโก้ */
-          .kys-titlerow{
-            display:flex; gap:18px; align-items:center; margin: 8px 0 8px 0;
-          }
-          .kys-logo{
-            width: 68px; height: 68px; border-radius: 16px; box-shadow: var(--shadow); object-fit:cover;
-            background:#fff;
-          }
-          .kys-title h1{
-            margin:0; font-size: clamp(28px, 2.6vw, 38px); color: var(--brand); font-weight:800;
-          }
+          /* Title */
+          .kys-title h1{ margin:0; font-size: clamp(28px, 2.6vw, 38px); color: var(--brand); font-weight:800; }
           .kys-title p{ margin:6px 0 0 0; color: var(--muted); }
 
           /* Grid 3 การ์ด */
@@ -126,27 +118,70 @@ def inject_fonts_and_css():
           .kys-card h4{ margin:0 0 10px 0; font-weight:600; color: var(--muted); }
           .kys-card ul{ margin: 8px 0 0 18px; color:#314657; line-height:1.6; }
 
-          /* ปุ่มอยู่ด้านล่างให้เสมอกันทุกใบ */
-          .kys-btn{
-            display:inline-flex; align-items:center; justify-content:center;
-            gap:8px; padding: 12px 16px; border-radius: 12px;
-            background: var(--brand); color:#fff !important; text-decoration:none !important;
-            box-shadow: var(--shadow); margin-top: 14px; min-height: 48px;
-          }
+          .kys-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; background:var(--brand); color:#fff !important; text-decoration:none !important; box-shadow:var(--shadow); margin-top:14px; min-height:48px; }
           .kys-btn:hover{ filter:brightness(1.06); }
 
-          /* ปุ่มติดต่อผู้ดูแล (ลอยอยู่ขวาล่างหน้าแรก) */
           .kys-contact{ width:100%; display:flex; justify-content:flex-end; margin-top:18px; }
-          .kys-contact a{
-            display:inline-flex; align-items:center; gap:8px; padding: 10px 14px;
-            border-radius: 999px; background: #0f2748; color: #fff !important;
-            text-decoration:none; box-shadow: var(--shadow);
-          }
+          .kys-contact a{ display:inline-flex; align-items:center; gap:8px; padding: 10px 14px; border-radius: 999px; background: #0f2748; color: #fff !important; text-decoration:none; box-shadow: var(--shadow); }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
+# ==============================
+# Login page (new)
+# ==============================
+def show_login(required_role: str):
+    """
+    required_role: 'teacher' | 'module_admin' | 'superadmin'
+    """
+    inject_fonts_and_css()
+
+    role_name = {
+        "teacher": "ครูผู้สอน (Teacher)",
+        "module_admin": "ผู้ดูแลโมดูล (Module Admin)",
+        "superadmin": "แอดมินใหญ่ (Superadmin)",
+    }[required_role]
+
+    st.title(f"เข้าสู่ระบบ — {role_name}")
+
+    with st.form(f"login_form_{required_role}", clear_on_submit=False):
+        tid = st.text_input("User ID / Teacher ID")
+        pin = st.text_input("PIN", type="password")
+        submit = st.form_submit_button("เข้าสู่ระบบ")
+
+    if submit:
+        ok, u, err = check_login(tid, pin)
+        if not ok:
+            st.error(err)
+            return
+
+        allowed = {
+            "teacher": ["teacher", "module_admin", "superadmin"],
+            "module_admin": ["module_admin", "superadmin"],
+            "superadmin": ["superadmin"],
+        }[required_role]
+
+        user_role = u.get("role", "").strip().lower()
+        if user_role not in allowed:
+            st.error("สิทธิ์ไม่เพียงพอสำหรับเมนูนี้")
+            return
+
+        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
+        st.session_state["user"] = u
+
+        # นำทางไปหน้าเหมาะสม
+        if required_role == "teacher":
+            st.session_state["menu"] = "สำหรับผู้ใช้"
+        else:
+            st.session_state["menu"] = "สำหรับผู้ดูแล"
+
+        st.session_state["route"] = "home"
+        st.rerun()
+
+    if st.button("← กลับหน้าแรก"):
+        st.session_state["route"] = "home"
+        st.rerun()
 
 # ==============================
 # Pages
@@ -160,7 +195,7 @@ def show_home():
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2) Title + Subtitle (ไม่มีโลโก้)
+    # 2) Title + Subtitle
     st.markdown(
         f"""
         <div class="kys-title" style="text-align:center; margin-top:10px;">
@@ -173,13 +208,9 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # 3) การ์ด 3 ใบ + ฟอร์มล็อกอิน
-    import pandas as pd  # เผื่อยังไม่ได้ import ด้านบน
-    from streamlit import form
-
+    # 3) การ์ด 3 ใบ (ใช้ปุ่มพาไปหน้า Login)
     col1, col2, col3 = st.columns(3, gap="large")
 
-    # ---------- การ์ด: สำหรับครู ----------
     with col1:
         st.markdown(
             """
@@ -196,25 +227,11 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_teacher"):
-            tid = st.text_input("Teacher ID", key="t_tid")
-            pin = st.text_input("PIN", type="password", key="t_pin")
-            submit_t = st.form_submit_button("🔐 เข้าสู่ระบบครู")
-            if submit_t:
-                ok, u, err = check_login(tid, pin)
-                if not ok:
-                    st.error(err)
-                else:
-                    # สิทธิ์ที่ยอมรับ: teacher / module_admin / superadmin
-                    if u.get("role","").strip().lower() in ["teacher","module_admin","superadmin"]:
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
-                        st.session_state["user"] = u
-                        # TODO: เปลี่ยน route ไปหน้าใช้งานจริงของครูที่นี่
-                    else:
-                        st.error("สิทธิ์ไม่พอสำหรับเมนูนี้")
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบครู", key="to_login_teacher"):
+            st.session_state["route"] = "login_teacher"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------- การ์ด: ผู้ดูแลโมดูล ----------
     with col2:
         st.markdown(
             """
@@ -231,25 +248,11 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_module_admin"):
-            tid2 = st.text_input("User ID", key="m_tid")
-            pin2 = st.text_input("PIN", type="password", key="m_pin")
-            submit_m = st.form_submit_button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล")
-            if submit_m:
-                ok, u, err = check_login(tid2, pin2)
-                if not ok:
-                    st.error(err)
-                else:
-                    # ยอมรับเฉพาะ module_admin / superadmin
-                    if u.get("role","").strip().lower() in ["module_admin","superadmin"]:
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')} (ผู้ดูแลโมดูล)")
-                        st.session_state["user"] = u
-                        # TODO: เปลี่ยน route ไปหน้าโมดูลจริง
-                    else:
-                        st.error("เมนูนี้สำหรับผู้ดูแลโมดูลเท่านั้น")
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบผู้ดูแลโมดูล", key="to_login_module"):
+            st.session_state["route"] = "login_module_admin"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------- การ์ด: แอดมินใหญ่ ----------
     with col3:
         st.markdown(
             """
@@ -266,24 +269,10 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_superadmin"):
-            tid3 = st.text_input("User ID", key="s_tid")
-            pin3 = st.text_input("PIN", type="password", key="s_pin")
-            submit_s = st.form_submit_button("🔐 เข้าสู่ระบบแอดมินใหญ่")
-            if submit_s:
-                ok, u, err = check_login(tid3, pin3)
-                if not ok:
-                    st.error(err)
-                else:
-                    # ต้องเป็น superadmin เท่านั้น
-                    if u.get("role","").strip().lower() == "superadmin":
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')} (แอดมินใหญ่)")
-                        st.session_state["user"] = u
-                        # TODO: เปลี่ยน route ไปหน้าแอดมินใหญ่จริง
-                    else:
-                        st.error("เมนูนี้สำหรับแอดมินใหญ่เท่านั้น")
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบแอดมินใหญ่", key="to_login_super"):
+            st.session_state["route"] = "login_superadmin"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
 
     # 4) ปุ่มติดต่อผู้ดูแลระบบ
     st.markdown(
@@ -307,25 +296,32 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-
-
 def show_teacher_portal():
     inject_fonts_and_css()
     st.title("พื้นที่สำหรับผู้ใช้ (ครู)")
     st.info("หน้านี้ไว้ต่อยอดฟอร์ม/เมนูย่อยสำหรับครูในอนาคตครับ")
-
 
 def show_admin_portal():
     inject_fonts_and_css()
     st.title("พื้นที่สำหรับผู้ดูแล")
     st.info("หน้านี้ไว้ต่อยอดเมนูย่อยสำหรับผู้ดูแล/แอดมินในอนาคตครับ")
 
-
 # ==============================
 # App — Sidebar & Routing
 # ==============================
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
+
+    # ✅ ตรวจ route ย่อยก่อน (แสดงหน้า login เฉพาะทาง)
+    route = st.session_state.get("route", "home")
+    if route == "login_teacher":
+        show_login("teacher"); return
+    elif route == "login_module_admin":
+        show_login("module_admin"); return
+    elif route == "login_superadmin":
+        show_login("superadmin"); return
+
+    # Sidebar / เมนูหลัก
     with st.sidebar:
         st.markdown("### เมนู")
         st.session_state["menu"] = st.radio(
@@ -335,13 +331,13 @@ def main():
             label_visibility="collapsed",
         )
 
+    # Routing หลัก
     if st.session_state["menu"] == "หน้าแรก":
         show_home()
     elif st.session_state["menu"] == "สำหรับผู้ใช้":
         show_teacher_portal()
     else:
         show_admin_portal()
-
 
 if __name__ == "__main__":
     main()
