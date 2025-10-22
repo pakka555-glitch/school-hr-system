@@ -33,62 +33,58 @@ def asset(name: str) -> str:
 # -------------------------------------------------
 # โหลดฟอนต์ + CSS (เรียกหนึ่งครั้งทุกหน้า)
 # -------------------------------------------------
+# ---------- Fonts & CSS ----------
 def inject_fonts_and_css():
     st.markdown(
         f"""
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-       <style>
-    :root {
+<style>
+    :root {{
         --brand: {BRAND_PRIMARY};
         --muted: {BRAND_MUTED};
-    }
+    }}
 
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
         color: #14202e;
-    }
+    }}
 
-    /* โครงกว้างขึ้น */
-    .block-container {
+    .block-container {{
         max-width: 1320px;
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
-    }
+    }}
 
     /* การ์ด 3 ใบสูงเท่ากัน ปุ่มอยู่ล่าง */
-    .kys-card {
+    .kys-card {{
         background: #fff;
         border: 1px solid #eaf0f6;
         border-radius: 16px;
         padding: 22px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* ปุ่มอยู่ล่าง */
+        justify-content: space-between;
         height: 100%;
         box-shadow: 0 6px 16px rgba(10,35,66,.04);
-    }
+    }}
 
-    .kys-card h3 {
+    .kys-card h3 {{
         margin: 0 0 6px 0;
         color: var(--brand);
         font-weight: 800;
-    }
+    }}
 
-    .kys-card h4 {
+    .kys-card h4 {{
         margin: 0 0 8px 0;
         color: #0e2a47;
         font-weight: 700;
-    }
+    }}
 
-    .kys-card ul {
+    .kys-card ul {{
         margin: 0 0 14px 16px;
-    }
+    }}
 
     /* ปุ่มหลัก */
-    .kys-btn {
+    .kys-btn {{
         display: inline-flex;
         align-items: center;
         gap: .6rem;
@@ -102,36 +98,32 @@ def inject_fonts_and_css():
         text-decoration: none !important;
         box-shadow: 0 6px 14px rgba(10,35,66,.18);
         font-weight: 700;
-    }
-
-    .kys-btn:hover {
-        filter: brightness(1.08);
-    }
+    }}
+    .kys-btn:hover {{ filter: brightness(1.08); }}
 
     /* ปุ่มรอง */
-    .kys-btn.secondary {
-        background: #1b3b6f;
-    }
+    .kys-btn.secondary {{ background: #1b3b6f; }}
 
     /* ปุ่มติดต่อผู้ดูแลระบบ - ชิดขวา */
-    .kys-contact {
+    .kys-contact {{
         display: flex;
         justify-content: flex-end;
         margin-top: 20px;
-    }
+    }}
 
     /* footer ขวาล่าง */
-    .kys-footer {
+    .kys-footer {{
         display: flex;
         justify-content: flex-end;
         color: #6b7785;
         font-size: 14px;
         margin-top: 8px;
-    }
+    }}
 </style>
         """,
         unsafe_allow_html=True,
     )
+
 
 
 # -------------------------------------------------
