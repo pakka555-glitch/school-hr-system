@@ -40,112 +40,95 @@ def inject_fonts_and_css():
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-        <style>
-            :root {{
-                --brand: {BRAND_PRIMARY};
-                --muted: {BRAND_MUTED};
-            }}
+       <style>
+    :root {
+        --brand: {BRAND_PRIMARY};
+        --muted: {BRAND_MUTED};
+    }
 
-            html, body, [class*="css"] {{
-                font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
-                color: #14202e;
-            }}
+    html, body, [class*="css"] {
+        font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+        color: #14202e;
+    }
 
-            /* กำหนดความกว้างคอนเทนเนอร์หลัก */
-            .block-container {{
-                max-width: 1320px;
-                padding-top: 1.0rem !important;
-                padding-bottom: 1.0rem !important;
-            }}
+    /* โครงกว้างขึ้น */
+    .block-container {
+        max-width: 1320px;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
 
-            /* แบนเนอร์ / โลโก้ */
-            .kys-banner img {{
-                border-radius: 16px;
-                box-shadow: 0 6px 20px rgba(0,0,0,.08);
-            }}
-            .kys-logo {{
-                border-radius: 14px;
-                width: 120px;
-                height: 120px;
-                object-fit: cover;
-                border: 4px solid #fff;
-                box-shadow: 0 4px 14px rgba(0,0,0,.12);
-            }}
+    /* การ์ด 3 ใบสูงเท่ากัน ปุ่มอยู่ล่าง */
+    .kys-card {
+        background: #fff;
+        border: 1px solid #eaf0f6;
+        border-radius: 16px;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* ปุ่มอยู่ล่าง */
+        height: 100%;
+        box-shadow: 0 6px 16px rgba(10,35,66,.04);
+    }
 
-            /* ส่วนหัวใหญ่ */
-            .kys-hero h1 {{
-                font-size: 36px;
-                font-weight: 800;
-                line-height: 1.25;
-                margin: 0 0 .35rem 0;
-                color: var(--brand);
-            }}
-            .kys-hero p {{
-                color: var(--muted);
-                margin: 0 0 .6rem 0;
-            }}
+    .kys-card h3 {
+        margin: 0 0 6px 0;
+        color: var(--brand);
+        font-weight: 800;
+    }
 
-            /* การ์ดบทบาท + ปุ่มล่างเสมอ */
-            .kys-card {{
-                background: #fff;
-                border: 1px solid #eaf0f6;
-                border-radius: 16px;
-                padding: 22px;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                height: 100%;
-                box-shadow: 0 6px 16px rgba(10,35,66,.04);
-            }}
-            .kys-card h3 {{
-                margin: 0 0 6px 0;
-                color: var(--brand);
-                font-weight: 800;
-            }}
-            .kys-card h4 {{
-                margin: 0 0 8px 0;
-                color: #0e2a47;
-                font-weight: 700;
-            }}
-            .kys-card ul {{
-                margin: 0 0 8px 16px;
-            }}
-            .kys-spacer {{
-                flex: 1;
-            }}
+    .kys-card h4 {
+        margin: 0 0 8px 0;
+        color: #0e2a47;
+        font-weight: 700;
+    }
 
-            /* ปุ่มหลัก */
-            .kys-btn {{
-                display: inline-flex;
-                align-items: center;
-                gap: .6rem;
-                border: none;
-                color: #fff !important;
-                background: var(--brand);
-                padding: 10px 14px;
-                border-radius: 10px;
-                text-decoration: none !important;
-                box-shadow: 0 6px 14px rgba(10,35,66,.18);
-                font-weight: 700;
-            }}
-            .kys-btn:hover {{
-                filter: brightness(1.05);
-            }}
+    .kys-card ul {
+        margin: 0 0 14px 16px;
+    }
 
-            /* ปุ่มรอง */
-            .kys-btn.secondary {{
-                background: #1b3b6f;
-            }}
+    /* ปุ่มหลัก */
+    .kys-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .6rem;
+        justify-content: center;
+        width: 100%;
+        border: none;
+        color: #fff !important;
+        background: var(--brand);
+        padding: 10px 14px;
+        border-radius: 10px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 14px rgba(10,35,66,.18);
+        font-weight: 700;
+    }
 
-            /* footer ขวา */
-            .kys-footer {{
-                display: flex;
-                justify-content: flex-end;
-                color: #6b7785;
-                font-size: 14px;
-                margin-top: 16px;
-            }}
-        </style>
+    .kys-btn:hover {
+        filter: brightness(1.08);
+    }
+
+    /* ปุ่มรอง */
+    .kys-btn.secondary {
+        background: #1b3b6f;
+    }
+
+    /* ปุ่มติดต่อผู้ดูแลระบบ - ชิดขวา */
+    .kys-contact {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    /* footer ขวาล่าง */
+    .kys-footer {
+        display: flex;
+        justify-content: flex-end;
+        color: #6b7785;
+        font-size: 14px;
+        margin-top: 8px;
+    }
+</style>
         """,
         unsafe_allow_html=True,
     )
@@ -174,7 +157,7 @@ def show_home():
             f"""
             <div class="kys-hero">
                 <h1>{APP_TITLE}</h1>
-                <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้</p>
+                <p>ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -241,12 +224,14 @@ def show_home():
 
     st.write("")
     # ปุ่มติดต่อผู้ดูแลระบบ
-    st.markdown(
-        f"""
+   st.markdown(
+    f"""
+    <div class="kys-contact">
         <a class="kys-btn" href="mailto:{CONTACT_EMAIL}">✉️ ติดต่อผู้ดูแลระบบ</a>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
     # Footer ขวา
     st.markdown(
