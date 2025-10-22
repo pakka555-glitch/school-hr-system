@@ -77,16 +77,16 @@ def show_home():
     inject_fonts_and_css()
 
     # 1) Banner (ถ้ามีไฟล์)
-    if os.path.exists("banner.jpg"):
+    if os.path.exists("assets/banner.jpg"):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
-        st.image("banner.jpg", use_container_width=True)
+        st.image("assets/banner.jpg", use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     # 2) Logo + Title
     col1, col2 = st.columns([1, 4])
     with col1:
-        if os.path.exists("logo.jpg"):
-            st.image("logo.jpg", width=180)  # ปรับขนาดโลโก้ได้
+        if os.path.exists("assets/logo.jpg"):
+            st.image("assets/logo.jpg", width=180)
     with col2:
         st.markdown(
             """
@@ -94,14 +94,13 @@ def show_home():
                 ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่
             </h1>
             <p style='color:#445b66; margin-top:4px; font-size:17px'>
-                ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้
+                ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้
             </p>
             """,
             unsafe_allow_html=True
         )
 
     st.markdown("---")
-
 
     # 3) การ์ด 3 ใบ (สูงเท่ากัน + ปุ่มชิดล่าง)
     c1, c2, c3 = st.columns(3)
