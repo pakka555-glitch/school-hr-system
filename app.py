@@ -85,8 +85,8 @@ def show_home():
     # 2) Logo + Title
     col1, col2 = st.columns([1, 4])
     with col1:
-        if os.path.exists("logo.png"):
-            st.image("logo.png", width=180)  # ปรับขนาดโลโก้ได้
+        if os.path.exists("logo.jpg"):
+            st.image("logo.jpg", width=180)  # ปรับขนาดโลโก้ได้
     with col2:
         st.markdown(
             """
