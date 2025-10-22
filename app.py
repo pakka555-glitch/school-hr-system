@@ -122,30 +122,18 @@ def show_home():
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2) Title + Logo + Subtitle  (Base64 logo)
-    st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
-    if os.path.exists(LOGO_PATH):
-        with open(LOGO_PATH, "rb") as f:
-            logo_base64 = base64.b64encode(f.read()).decode("utf-8")
-        st.markdown(
-            f'<img class="kys-logo" src="data:image/jpeg;base64,{logo_base64}"/>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="kys-logo" style="background:#ddd;display:flex;align-items:center;justify-content:center;">❌</div>',
-            unsafe_allow_html=True,
-        )
+    # 2) Title + Subtitle (ไม่มีโลโก้)
     st.markdown(
         f"""
-        <div class="kys-title">
+        <div class="kys-title" style="text-align:center; margin-top:10px;">
           <h1>{APP_TITLE}</h1>
-          <p>ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</p>
+          <p style="color:{BRAND_MUTED}; font-size:18px;">
+            ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้
+          </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # 3) การ์ด 3 ใบ
     st.markdown(
@@ -196,7 +184,7 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # 4) ปุ่มติดต่อผู้ดูแลระบบ (ชิดขวา)
+    # 4) ปุ่มติดต่อผู้ดูแลระบบ
     st.markdown(
         f"""
         <div class="kys-contact">
@@ -217,6 +205,7 @@ def show_home():
         """,
         unsafe_allow_html=True,
     )
+
 
 
 def show_teacher_portal():
