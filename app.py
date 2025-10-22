@@ -17,77 +17,56 @@ if "menu" not in st.session_state:
 # ------------------------------------
 # Helper: โหลดฟอนต์ Google
 # ------------------------------------
+# ---------- สีหลักที่ใช้ทั่วเว็บ ----------
+BRAND_PRIMARY = "#0a2342"   # น้ำเงินเข้ม
+BRAND_MUTED   = "#445b66"   # เทาอมฟ้า
+
 def inject_fonts_and_css():
     st.markdown(
-        """
+        f"""
+        <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+
         <style>
-            html, body, [class*="css"]  {
-                font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', "Liberation Sans", sans-serif;
-            }
-            /* ปรับ Card ให้สูงเท่ากัน + ปุ่มชิดล่าง */
-            .kys-card{
-                border:1px solid #eaedf3;
-                background:#fff;
-                border-radius:16px;
-                padding:22px;
-                box-shadow:0 2px 10px rgba(10,35,66,.06);
-                height:100%;
-                display:flex;
-                flex-direction:column;
-                gap:10px;
-            }
-            .kys-card h3{
-                margin:0 0 6px 0;
-                color:%s;
-                font-weight:800;
-            }
-            .kys-muted{ color:%s; }
-            .kys-push { margin-top:auto; }
-            .kys-badge{
-                display:inline-block;
-                background:#eef2ff;
-                border:1px solid #d7defc;
-                color:#233876;
-                border-radius:999px;
-                padding:2px 10px;
-                font-size:12px;
-                margin-left:8px;
-                vertical-align:middle;
-            }
-            .kys-hero-title{
-                font-weight:800;
-                font-size:44px;
-                color:%s;
-                margin:0;
-            }
-            .kys-hero-sub{
-                color:%s;
-                font-size:18px;
-                margin-top:6px;
-            }
-            .kys-footer{
-                text-align:right;
-                color:%s;
-                margin-top:36px;
-                font-size:14px;
-            }
-            /* ปุ่มลอยติดต่อผู้ดูแล */
-            .kys-fab{
-                position:fixed;
-                right:18px;
-                bottom:18px;
-                z-index:9999;
-            }
-            .kys-banner{
-                border-radius:14px;
-                overflow:hidden;
-                border:1px solid #e8ecf3;
-            }
+          :root {{
+            --brand-primary: {BRAND_PRIMARY};
+            --brand-muted:   {BRAND_MUTED};
+          }}
+
+          html, body, * {{
+            font-family: "Noto Sans Thai", system-ui, -apple-system, Segoe UI, Roboto, sans-serif !important;
+          }}
+
+          /* ปุ่มหลัก */
+          .stButton > button {{
+            background: var(--brand-primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.1rem;
+            font-weight: 600;
+          }}
+          .stButton > button:hover {{
+            filter: brightness(1.05);
+          }}
+
+          /* การ์ด (container) */
+          .app-card {{
+            border: 1px solid #e7ecef;
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+          }}
+
+          /* ตัวอย่างที่มี % ใน CSS จะปลอดภัยเพราะเราใช้ f-string */
+          .hero-mask {{
+            background: linear-gradient(0deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.92) 100%);
+          }}
         </style>
-        """ % (BRAND_PRIMARY, BRAND_MUTED, BRAND_PRIMARY, BRAND_MUTED, BRAND_MUTED),
+        """,
         unsafe_allow_html=True,
     )
 
