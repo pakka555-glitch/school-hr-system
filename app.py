@@ -154,7 +154,7 @@ def show_home():
     st.markdown('<div class="kys-titlerow">', unsafe_allow_html=True)
 
     if os.path.exists(LOGO_PATH):
-        st.markdown(f'<img class="kys-logo" src="{LOGO_PATH}"/>', unsafe_allow_html=True)
+        st.markdown(f'<img class="kys-logo" src="./assets/logo.jpg"/>', unsafe_allow_html=True)
     else:
         # แสดงข้อความเล็กๆ หากหาโลโก้ไม่เจอ
         st.markdown('<img class="kys-logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="/>',
@@ -230,6 +230,17 @@ def show_home():
         unsafe_allow_html=True,
     )
 
+    # 5) Footer – ข้อความเครดิต
+    st.markdown(
+        """
+        <hr style="margin-top:32px;margin-bottom:12px;border:1px solid #e0e6ec;">
+        <div style='text-align:center; color:#445b66; font-size:15px;'>
+            พัฒนาโดย <b>กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด</b><br>
+            เพื่อยกระดับการบริหารจัดการงานบุคคลให้ทันสมัย โปร่งใส และตรวจสอบได้
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 def show_teacher_portal():
     inject_fonts_and_css()
