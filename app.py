@@ -86,19 +86,22 @@ def show_home():
     col1, col2 = st.columns([1, 4])
     with col1:
         if os.path.exists("logo.png"):
-            st.image("logo.png", width=180)
+            st.image("logo.png", width=180)  # ปรับขนาดโลโก้ได้
     with col2:
         st.markdown(
-            f"""
-            <h1 class="kys-hero-title">{APP_TITLE}</h1>
-            <p class="kys-hero-sub">
-                ช่วยให้ครูและบุคลากรจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้
+            """
+            <h1 style='font-size:42px; font-weight:700; color:#0a2342; margin-bottom:0'>
+                ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่
+            </h1>
+            <p style='color:#445b66; margin-top:4px; font-size:17px'>
+                ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลได้อย่างมีระบบ โปร่งใส และตรวจสอบได้
             </p>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
     st.markdown("---")
+
 
     # 3) การ์ด 3 ใบ (สูงเท่ากัน + ปุ่มชิดล่าง)
     c1, c2, c3 = st.columns(3)
