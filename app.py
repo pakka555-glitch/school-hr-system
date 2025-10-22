@@ -168,7 +168,7 @@ def show_home():
     col_logo, col_title = st.columns([1, 4], vertical_alignment="center")
     with col_logo:
         if os.path.exists(asset("logo.jpg")):
-            st.image(asset("logo.jpg"), caption=None, width=120, output_format="auto", use_column_width=False, clamp=False)
+            st.image(asset("logo.jpg"), use_container_width=True)
     with col_title:
         st.markdown(
             f"""
