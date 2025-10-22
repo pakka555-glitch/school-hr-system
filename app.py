@@ -105,7 +105,7 @@ def load_users():
         return pd.DataFrame(columns=["teacher_id","name","email","department","pin","role","admin_modules"])
 
 def get_user(tid: str):
-    df = load_users()
+    df = load_users_safe()
     m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
     return m.iloc[0].to_dict() if not m.empty else None
 
