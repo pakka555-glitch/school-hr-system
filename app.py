@@ -2,6 +2,64 @@ import os
 import pandas as pd
 import streamlit as st
 
+# ====================================================
+# Safe Config & Offline Mode Helpers
+# ====================================================
+import pandas as pd
+
+def sheets_config_ready() -> tuple[bool, str]:
+    """เช็คว่าตั้งค่า Google Sheets พร้อมหรือยัง"""
+    try:
+        if "SHEET_ID" not in st.secrets:
+            return False, "ไม่มี SHEET_ID ใน secrets"
+        if "gcp_service_account" not in st.secrets:
+            return False, "ไม่มี gcp_service_account ใน secrets"
+        from google.oauth2.service_account import Credentials
+        return True, "ok"
+    except Exception as e:
+        return False, f"{e}"
+
+def get_users_df_offline() -> pd.DataFrame:
+    """อ่าน users จากไฟล์ csv ภายในโปรเจ็กต์ (fallback)"""
+    try:
+        return pd.read_csv("teachers.csv", dtype=str).fillna("")
+    except Exception:
+        return pd.DataFrame(columns=[
+            "teacher_id","name","email","department","pin","role","admin_modules"
+        ])
+
+def get_users_df_online() -> pd.DataFrame:
+    """อ่าน users จาก Google Sheets (ต้องตั้งค่าเสร็จก่อน)"""
+    import gspread
+    from google.oauth2.service_account import Credentials
+
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
+        "https://www.googleapis.com/auth/drive.readonly",
+    ]
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], scopes=scopes
+    )
+    gc = gspread.authorize(creds)
+    sh = gc.open_by_key(st.secrets["SHEET_ID"])
+    ws = sh.sheet1
+    data = ws.get_all_records()
+    return pd.DataFrame(data, dtype=str).fillna("")
+
+def load_users_safe() -> pd.DataFrame:
+    """พยายามอ่านจาก Sheets ถ้าตั้งค่าไม่พร้อมจะ fallback เป็น CSV"""
+    ok, reason = sheets_config_ready()
+    if ok:
+        try:
+            return get_users_df_online()
+        except Exception as e:
+            st.warning(f"อ่าน Google Sheets ไม่สำเร็จ → ใช้โหมดออฟไลน์แทน ({e})")
+            return get_users_df_offline()
+    else:
+        st.info(f"ยังไม่ได้ตั้งค่า Google Sheets → ใช้โหมดออฟไลน์ ({reason})")
+        return get_users_df_offline()
+
+
 # ==============================
 # Settings & Branding
 # ==============================
