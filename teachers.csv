@@ -1,4 +1,4 @@
 teacher_id,name,email,department,pin,role,admin_modules
-T001,ครู A,ae@example.com,ประถม,123456,teacher,
-T999,หัวหน้าบุคลากร,hr@example.com,บุคคล,999999,superadmin,
-T100,แอดมิน-ลา,leaveadmin@example.com,บุคคล,111111,module_admin,leave,offs
+1001,ครูสุพจน์,supot@example.com,ฝ่ายวิชาการ,1234,teacher,
+2001,ครูสมชาย,somchai@example.com,ฝ่ายบริหาร,5678,executive,
+3001,ครูสุดา,suda@example.com,ฝ่ายบุคคล,9999,superadmin,
