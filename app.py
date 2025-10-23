@@ -21,7 +21,7 @@ def inject_fonts_and_css():
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
 
-    /* การ์ดหลัก */
+    /* การ์ด */
     [data-testid="stContainer"] {
         border-radius: 14px !important;
         padding: 18px 20px !important;
@@ -31,10 +31,10 @@ def inject_fonts_and_css():
     }
 
     /* accent bar */
-    [data-testid="stContainer"]:nth-of-type(1)::before {background-color:#1E88E5;}
-    [data-testid="stContainer"]:nth-of-type(2)::before {background-color:#8E24AA;}
-    [data-testid="stContainer"]:nth-of-type(3)::before {background-color:#0277BD;}
-    [data-testid="stContainer"]:nth-of-type(4)::before {background-color:#43A047;}
+    [data-testid="stContainer"]:nth-of-type(1)::before {background-color:#1565C0;}
+    [data-testid="stContainer"]:nth-of-type(2)::before {background-color:#6A1B9A;}
+    [data-testid="stContainer"]:nth-of-type(3)::before {background-color:#01579B;}
+    [data-testid="stContainer"]:nth-of-type(4)::before {background-color:#2E7D32;}
     [data-testid="stContainer"]::before {
         content:"";
         position:absolute;
@@ -42,7 +42,7 @@ def inject_fonts_and_css():
         border-top-left-radius:14px; border-top-right-radius:14px;
     }
 
-    /* ให้บอดี้การ์ดมีความสูงเท่ากัน */
+    /* ความสูงเนื้อหาเท่ากัน */
     .role-body {
         min-height: 110px;
         display: flex;
@@ -50,7 +50,7 @@ def inject_fonts_and_css():
         justify-content: space-between;
     }
 
-    /* ปุ่มเข้าสู่ระบบ */
+    /* ปุ่มเข้าสู่ระบบ — สีเข้ม สดใส พร้อม hover shadow */
     .stButton>button {
         width: 100% !important;
         color: #fff !important;
@@ -58,20 +58,22 @@ def inject_fonts_and_css():
         border-radius: 10px;
         padding: 10px 0;
         font-weight: 600;
+        font-size: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         transition: all 0.25s ease;
     }
 
-    div[data-testid="column"]:nth-of-type(1) .stButton>button {background:#1E88E5;}
-    div[data-testid="column"]:nth-of-type(1) .stButton>button:hover {background:#1565C0;}
+    div[data-testid="column"]:nth-of-type(1) .stButton>button {background:#0D47A1;}
+    div[data-testid="column"]:nth-of-type(1) .stButton>button:hover {background:#002171; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
 
-    div[data-testid="column"]:nth-of-type(2) .stButton>button {background:#8E24AA;}
-    div[data-testid="column"]:nth-of-type(2) .stButton>button:hover {background:#6A1B9A;}
+    div[data-testid="column"]:nth-of-type(2) .stButton>button {background:#7B1FA2;}
+    div[data-testid="column"]:nth-of-type(2) .stButton>button:hover {background:#4A148C; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
 
-    div[data-testid="column"]:nth-of-type(3) .stButton>button {background:#0277BD;}
-    div[data-testid="column"]:nth-of-type(3) .stButton>button:hover {background:#01579B;}
+    div[data-testid="column"]:nth-of-type(3) .stButton>button {background:#004C8C;}
+    div[data-testid="column"]:nth-of-type(3) .stButton>button:hover {background:#002C5F; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
 
-    div[data-testid="column"]:nth-of-type(4) .stButton>button {background:#43A047;}
-    div[data-testid="column"]:nth-of-type(4) .stButton>button:hover {background:#2E7D32;}
+    div[data-testid="column"]:nth-of-type(4) .stButton>button {background:#1B5E20;}
+    div[data-testid="column"]:nth-of-type(4) .stButton>button:hover {background:#0B3D02; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
 
     /* Footer */
     .footer {text-align:center;color:gray;font-size:14px;margin-top:40px;}
