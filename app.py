@@ -16,7 +16,7 @@ ASSETS_DIR = "assets"
 BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")  # วางรูปชื่อ banner.jpg ในโฟลเดอร์ assets/
 
 # ==========================
-# 🎨 CSS และฟอนต์
+# 🎨 CSS และฟอนต์ (ปุ่มสีประจำบทบาท + accent bar + footer)
 # ==========================
 def inject_fonts_and_css():
     css = """
@@ -24,56 +24,59 @@ def inject_fonts_and_css():
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
 
-    /* === กรอบการ์ด === */
-    .kys-card {
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-        padding: 24px 22px;
-        transition: 0.3s;
-        border: 1px solid #e0e0e0;
-        min-height: 280px;
-    }
-    .kys-card:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        transform: translateY(-3px);
+    /* ===== การ์ดหลัก ===== */
+    [data-testid="stContainer"] {
+        border-radius: 14px !important;
+        padding: 18px 20px !important;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+        position: relative;
+        background: #fff;
     }
 
-    /* === ปุ่ม === */
-    .kys-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px 18px;
-        border-radius: 10px;
-        background: #0a3a75;
-        color: #fff !important;
-        font-weight: 600;
-        text-decoration: none !important;
+    /* ===== แถบสีบทบาท (Accent bar) — อ้างตามลำดับในหน้า ===== */
+    [data-testid="stContainer"]:nth-of-type(1)::before,
+    [data-testid="stContainer"]:nth-of-type(2)::before,
+    [data-testid="stContainer"]:nth-of-type(3)::before,
+    [data-testid="stContainer"]:nth-of-type(4)::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 6px;
+        border-top-left-radius: 14px; border-top-right-radius: 14px;
     }
-    .kys-btn:hover { background: #052956; }
+    /* ครูผู้สอน */
+    [data-testid="stContainer"]:nth-of-type(1)::before { background-color: #1E88E5; }
+    /* ผู้ดูแลโมดูล */
+    [data-testid="stContainer"]:nth-of-type(2)::before { background-color: #8E24AA; }
+    /* แอดมินใหญ่ */
+    [data-testid="stContainer"]:nth-of-type(3)::before { background-color: #0277BD; }
+    /* ฝ่ายบริหาร */
+    [data-testid="stContainer"]:nth-of-type(4)::before { background-color: #43A047; }
 
-    /* === แบนเนอร์ === */
-    .kys-banner {
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 8px 22px rgba(0,0,0,0.10);
-        margin-bottom: 18px;
+    /* ===== ปุ่มเข้าสู่ระบบ (สีตามบทบาท) ===== */
+    .stButton>button {
+        color: white !important; font-weight: 600; border: none;
+        border-radius: 10px; padding: 10px 0px; width: 100% !important;
+        transition: all 0.25s ease-in-out;
     }
+    /* ไล่ตามลำดับปุ่มในคอลัมน์ 1..4 */
+    div.stButton:nth-of-type(1) > button { background-color: #1E88E5; } /* ครู */
+    div.stButton:nth-of-type(1) > button:hover { background-color: #1565C0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
 
-    /* === เครดิต === */
-    .footer {
-        text-align:center;
-        color:gray;
-        font-size:14px;
-        margin-top:40px;
-    }
-    .footer img {
-        width: 22px;
-        vertical-align: middle;
-        margin-right: 5px;
-        opacity: 0.7;
-    }
+    div.stButton:nth-of-type(2) > button { background-color: #8E24AA; } /* ผู้ดูแลโมดูล */
+    div.stButton:nth-of-type(2) > button:hover { background-color: #6A1B9A; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+    div.stButton:nth-of-type(3) > button { background-color: #0277BD; } /* แอดมินใหญ่ */
+    div.stButton:nth-of-type(3) > button:hover { background-color: #01579B; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+    div.stButton:nth-of-type(4) > button { background-color: #43A047; } /* ฝ่ายบริหาร */
+    div.stButton:nth-of-type(4) > button:hover { background-color: #2E7D32; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+    /* ===== แบนเนอร์ ===== */
+    .kys-banner { border-radius: 14px; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.10); margin-bottom: 18px; }
+
+    /* ===== Footer ===== */
+    .footer { text-align:center; color:gray; font-size:14px; margin-top:40px; }
+    .footer img { width: 22px; vertical-align: middle; margin-right: 5px; opacity: 0.7; }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -81,7 +84,7 @@ def inject_fonts_and_css():
 inject_fonts_and_css()
 
 # ==========================
-# 🔗 ฟังก์ชันเชื่อม Google Sheets
+# 🔗 ฟังก์ชันเชื่อม Google Sheets (Users)
 # ==========================
 @st.cache_resource(show_spinner=False)
 def get_gs_client():
@@ -99,22 +102,22 @@ def load_users_df():
     try:
         client = get_gs_client()
         sheet_id = st.secrets["gsheets"]["users_sheet_id"]
-        ws_name = st.secrets["gsheets"]["users_worksheet"]
+        ws_name  = st.secrets["gsheets"]["users_worksheet"]
         sh = client.open_by_key(sheet_id)
         ws = sh.worksheet(ws_name)
         data = ws.get_all_records()
         df = pd.DataFrame(data).fillna("")
-        # ปรับชนิดข้อมูล
-        for col in ["teacher_id", "pin", "role", "name", "email"]:
+        # บังคับให้มีคอลัมน์จำเป็น
+        for col in ["teacher_id", "pin", "role", "name", "email", "department"]:
             if col not in df.columns:
                 df[col] = ""
         df["teacher_id"] = df["teacher_id"].astype(str).str.strip()
-        df["pin"] = df["pin"].astype(str).str.strip()
-        df["role"] = df["role"].astype(str).str.lower().str.strip()
+        df["pin"]        = df["pin"].astype(str).str.strip()
+        df["role"]       = df["role"].astype(str).str.lower().str.strip()
         return df
     except Exception as e:
         st.error(f"ไม่สามารถโหลดข้อมูลผู้ใช้ได้: {e}")
-        return pd.DataFrame(columns=["teacher_id", "name", "email", "role", "pin"])
+        return pd.DataFrame(columns=["teacher_id", "name", "email", "department", "role", "pin"])
 
 def check_login(user_id, pin, allowed_roles):
     df = load_users_df()
@@ -138,12 +141,13 @@ if "route" not in st.session_state:
 # 🏠 หน้าแรก (Home)
 # ==========================
 def page_home():
-    # ✅ แบนเนอร์
+    # ✅ แบนเนอร์ (ถ้ามีไฟล์)
     if os.path.exists(BANNER_PATH):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
+    # ✅ หัวเรื่อง
     st.markdown(
         "<h2 style='text-align:center;color:#0a3a75;'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>",
         unsafe_allow_html=True
@@ -153,62 +157,46 @@ def page_home():
         unsafe_allow_html=True
     )
 
+    # ✅ การ์ด 4 คอลัมน์
     col1, col2, col3, col4 = st.columns(4, gap="large")
 
-    # ---- การ์ด: ครูผู้สอน ----
     with col1:
         with st.container(border=True):
             st.subheader("👩‍🏫 สำหรับครูผู้สอน")
             st.write("- จัดการ/ปรับปรุงข้อมูลส่วนบุคคล\n- ส่งคำขอลา/อบรม\n- อัปโหลดเอกสาร")
+            st.write("")  # เติมช่องว่างให้ปุ่มอยู่ระดับเดียวกัน
             if st.button("🔐 เข้าสู่ระบบครูผู้สอน", use_container_width=True):
                 st.session_state["route"] = "login_teacher"
                 st.rerun()
 
-    # ---- การ์ด: ผู้ดูแลโมดูล ----
     with col2:
         with st.container(border=True):
             st.subheader("⚙️ ผู้ดูแลโมดูล")
             st.write("- ตรวจสอบ/อนุมัติคำขอในโมดูล\n- ดูสถิติและรายงานในโมดูล")
+            st.write("")
             if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
                 st.session_state["route"] = "login_module_admin"
                 st.rerun()
 
-    # ---- การ์ด: แอดมินใหญ่ ----
     with col3:
         with st.container(border=True):
             st.subheader("🛡️ แอดมินใหญ่")
             st.write("- จัดการสิทธิ์เข้าระบบ\n- ออกรายงานรวมเพื่อบริหาร")
+            st.write("")
             if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
                 st.session_state["route"] = "login_superadmin"
                 st.rerun()
 
-    # ---- การ์ด: ฝ่ายบริหาร ----
     with col4:
         with st.container(border=True):
             st.subheader("🏫 ฝ่ายบริหาร (Executive)")
             st.write("- สำหรับผู้บริหารโรงเรียน\n- ดูรายงานภาพรวมทั้งหมด")
+            st.write("")
             if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร", use_container_width=True):
                 st.session_state["route"] = "login_executive"
                 st.rerun()
 
-    # ---- เครดิต ----
-    st.markdown("---")
-    st.markdown(
-        """
-        <div class="footer">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-            พัฒนาโดย <b>ครูสุพจน์ นามโคตร</b> โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br>
-            School HR System v2 | Powered by 
-            <img src="https://streamlit.io/images/brand/streamlit-mark-color.png"> Streamlit + 
-            <img src="https://www.svgrepo.com/show/373589/google-sheets.svg"> Google Sheets
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ==========================
-    # 🧑‍💻 เครดิตผู้พัฒนา (Footer)
-    # ==========================
+    # ✅ Footer (เครดิตพัฒนา)
     st.markdown("---")
     st.markdown(
         """
@@ -224,7 +212,7 @@ def page_home():
     )
 
 # ==========================
-# 🔑 หน้าล็อกอิน
+# 🔑 หน้าล็อกอิน (ฟังก์ชันรวมใช้ได้ทุกบทบาท)
 # ==========================
 def login_page(title, roles, next_route):
     st.markdown(f"### {title}")
