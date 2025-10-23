@@ -155,41 +155,56 @@ def page_home():
 
     col1, col2, col3, col4 = st.columns(4, gap="large")
 
+    # ---- การ์ด: ครูผู้สอน ----
     with col1:
-        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
-        st.subheader("👩‍🏫 สำหรับครูผู้สอน")
-        st.write("- จัดการ/ปรับปรุงข้อมูลส่วนบุคคล\n- ส่งคำขอลา/อบรม\n- อัปโหลดเอกสาร")
-        if st.button("🔐 เข้าสู่ระบบครูผู้สอน", use_container_width=True):
-            st.session_state["route"] = "login_teacher"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("👩‍🏫 สำหรับครูผู้สอน")
+            st.write("- จัดการ/ปรับปรุงข้อมูลส่วนบุคคล\n- ส่งคำขอลา/อบรม\n- อัปโหลดเอกสาร")
+            if st.button("🔐 เข้าสู่ระบบครูผู้สอน", use_container_width=True):
+                st.session_state["route"] = "login_teacher"
+                st.rerun()
 
+    # ---- การ์ด: ผู้ดูแลโมดูล ----
     with col2:
-        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
-        st.subheader("⚙️ ผู้ดูแลโมดูล")
-        st.write("- ตรวจสอบ/อนุมัติคำขอในโมดูล\n- ดูสถิติและรายงานในโมดูล")
-        if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
-            st.session_state["route"] = "login_module_admin"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("⚙️ ผู้ดูแลโมดูล")
+            st.write("- ตรวจสอบ/อนุมัติคำขอในโมดูล\n- ดูสถิติและรายงานในโมดูล")
+            if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
+                st.session_state["route"] = "login_module_admin"
+                st.rerun()
 
+    # ---- การ์ด: แอดมินใหญ่ ----
     with col3:
-        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
-        st.subheader("🛡️ แอดมินใหญ่")
-        st.write("- จัดการสิทธิ์เข้าระบบ\n- ออกรายงานรวมเพื่อบริหาร")
-        if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
-            st.session_state["route"] = "login_superadmin"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("🛡️ แอดมินใหญ่")
+            st.write("- จัดการสิทธิ์เข้าระบบ\n- ออกรายงานรวมเพื่อบริหาร")
+            if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
+                st.session_state["route"] = "login_superadmin"
+                st.rerun()
 
+    # ---- การ์ด: ฝ่ายบริหาร ----
     with col4:
-        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
-        st.subheader("🏫 ฝ่ายบริหาร (Executive)")
-        st.write("- สำหรับผู้บริหารโรงเรียน\n- ดูรายงานภาพรวมทั้งหมด")
-        if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร", use_container_width=True):
-            st.session_state["route"] = "login_executive"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("🏫 ฝ่ายบริหาร (Executive)")
+            st.write("- สำหรับผู้บริหารโรงเรียน\n- ดูรายงานภาพรวมทั้งหมด")
+            if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร", use_container_width=True):
+                st.session_state["route"] = "login_executive"
+                st.rerun()
+
+    # ---- เครดิต ----
+    st.markdown("---")
+    st.markdown(
+        """
+        <div class="footer">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+            พัฒนาโดย <b>ครูสุพจน์ นามโคตร</b> โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br>
+            School HR System v2 | Powered by 
+            <img src="https://streamlit.io/images/brand/streamlit-mark-color.png"> Streamlit + 
+            <img src="https://www.svgrepo.com/show/373589/google-sheets.svg"> Google Sheets
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # ==========================
     # 🧑‍💻 เครดิตผู้พัฒนา (Footer)
