@@ -331,6 +331,89 @@ def main():
     elif route == "executive_portal":
         executive_portal()
 
+if "route" not in st.session_state:
+    st.session_state["route"] = "home"
+
+import pandas as pd
+import gspread
+from google.oauth2.service_account import Credentials
+
+@st.cache_resource
+def get_gs_client():
+    info = dict(st.secrets["gcp_service_account"])
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.readonly",
+    ]
+    creds = Credentials.from_service_account_info(info, scopes=scopes)
+    return gspread.authorize(creds)
+
+@st.cache_data(ttl=60)
+def load_users_df():
+    try:
+        client = get_gs_client()
+        sheet_id = st.secrets["gsheets"]["users_sheet_id"]
+        ws_name = st.secrets["gsheets"]["users_worksheet"]
+        sh = client.open_by_key(sheet_id)
+        ws = sh.worksheet(ws_name)
+        data = ws.get_all_records()
+        df = pd.DataFrame(data).fillna("")
+        for c in ["teacher_id", "pin", "role"]:
+            if c in df: df[c] = df[c].astype(str).str.strip()
+        return df
+    except Exception as e:
+        st.error(f"ไม่สามารถโหลดข้อมูลผู้ใช้ได้: {e}")
+        return pd.DataFrame(columns=["teacher_id","name","role","pin"])
+
+def check_login(uid, pin):
+    df = load_users_df()
+    user = df[df["teacher_id"] == str(uid).strip()]
+    if user.empty:
+        return False, None, "❌ ไม่พบผู้ใช้"
+    u = user.iloc[0]
+    if str(u["pin"]) != str(pin).strip():
+        return False, None, "🔒 PIN ไม่ถูกต้อง"
+    return True, u, None
+
+def login_page():
+    st.title("🔐 เข้าสู่ระบบบุคลากรโรงเรียน")
+    st.markdown("กรุณากรอก **รหัสครู (Teacher ID)** และ **PIN** เพื่อเข้าสู่ระบบ")
+
+    with st.form("login_form"):
+        uid = st.text_input("รหัสครู / Teacher ID")
+        pin = st.text_input("PIN", type="password")
+        submit = st.form_submit_button("เข้าสู่ระบบ")
+
+    if submit:
+        ok, user, err = check_login(uid, pin)
+        if not ok:
+            st.error(err)
+        else:
+            st.success(f"ยินดีต้อนรับ {user['name']} 🎉")
+            st.session_state["user"] = dict(user)
+            st.session_state["route"] = "portal"
+            st.rerun()
+
+def user_portal():
+    u = st.session_state.get("user", {})
+    st.title(f"ยินดีต้อนรับคุณ {u.get('name','')} 👋")
+    st.info(f"บทบาท: {u.get('role','')}")
+    st.button("🚪 ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
+
+def home_page():
+    st.image("assets/banner.jpg", use_container_width=True)
+    st.markdown("## 🏫 ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่")
+    st.button("เข้าสู่ระบบ", on_click=lambda: st.session_state.update({"route": "login"}))
+
+def main():
+    route = st.session_state.get("route", "home")
+    if route == "home":
+        home_page()
+    elif route == "login":
+        login_page()
+    elif route == "portal":
+        user_portal()
+
 if __name__ == "__main__":
     main()
 
