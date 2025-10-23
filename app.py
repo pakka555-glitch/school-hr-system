@@ -1,10 +1,18 @@
 # app.py
+# =========================================================
+# School HR System — Streamlit + Google Sheets (RBAC)
+# =========================================================
+
 import os
 import base64
+import json
+import textwrap
+
 import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+
 
 # ======================
 # ตั้งค่าหน้าเว็บ
@@ -12,9 +20,9 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(page_title="School HR System", page_icon="🏫", layout="wide")
 
 # --- ใช้ไฟล์รูปภายในโปรเจกต์ ---
-ASSETS_DIR   = os.path.join(os.path.dirname(__file__), "assets")
-BANNER_PATH  = os.path.join(ASSETS_DIR, "banner.jpg")
-LOGO_PATH    = os.path.join(ASSETS_DIR, "logo.jpg")
+ASSETS_DIR  = os.path.join(os.path.dirname(__file__), "assets")
+BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")
+LOGO_PATH   = os.path.join(ASSETS_DIR, "logo.jpg")
 
 
 # ======================
@@ -146,26 +154,25 @@ def inject_css():
 
 inject_css()
 
+
 # ======================
 # Google Sheets client (robust)
 # ======================
-import json
-import textwrap
-
 @st.cache_resource(show_spinner=False)
 def get_gs_client():
+    """
+    อ่าน service account จาก st.secrets["gcp_service_account"]
+    และ normalize private_key ให้เป็นบรรทัดจริง (ไม่ใช่ '\\n')
+    """
     try:
-        # 1) เอาค่าจาก secrets ตรง ๆ
         info = dict(st.secrets["gcp_service_account"])
 
-        # 2) ทำให้ private_key กลายเป็นบรรทัดจริงแน่นอน
         pk = info.get("private_key", "")
-        # กรณีที่คีย์เป็นสตริงแบบมี \n อยู่ในข้อความ ให้แปลงเป็น line break จริง ๆ
+        # กรณีคีย์มี '\\n' ให้แปลงเป็น line break จริง
         if "\\n" in pk:
             pk = pk.replace("\\n", "\n")
-        # เผื่อคีย์ถูกเก็บเป็น single-line PEM
-        pk = textwrap.dedent(pk).strip()
-        info["private_key"] = pk
+        # กันกรณีคีย์เป็น single-line PEM
+        info["private_key"] = textwrap.dedent(pk).strip()
 
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -177,7 +184,46 @@ def get_gs_client():
         st.error(f"ไม่สามารถสร้างไคลเอนต์ Google Sheets ได้: {e}")
         raise
 
+
+@st.cache_data(ttl=60)
+def load_users_df() -> pd.DataFrame:
+    """
+    โหลดข้อมูลผู้ใช้จาก Google Sheets
+    secrets.toml ต้องมี:
+      [gsheets]
+      users_sheet_id   = "YOUR_SHEET_ID"
+      users_worksheet  = "users"
+    """
+    try:
+        client   = get_gs_client()
+        sheet_id = st.secrets["gsheets"]["users_sheet_id"]
+        ws_name  = st.secrets["gsheets"]["users_worksheet"]
+
+        sh = client.open_by_key(sheet_id)
+        ws = sh.worksheet(ws_name)
+
+        data = ws.get_all_records()
+        df = pd.DataFrame(data).fillna("")
+
+        # ให้แน่ใจว่า type เป็น string ทั้ง 3 คอลัมน์สำคัญ
+        for c in ("teacher_id", "pin", "role"):
+            if c in df:
+                df[c] = df[c].astype(str).str.strip()
+        # role เก็บเป็นตัวพิมพ์เล็กไว้เทียบสิทธิ์ง่าย ๆ
+        if "role" in df:
+            df["role"] = df["role"].str.lower()
+
+        return df
+    except Exception as e:
+        st.error(f"โหลดผู้ใช้ไม่สำเร็จ: {e}")
+        return pd.DataFrame(columns=["teacher_id", "name", "email", "role", "pin"])
+
+
 def check_login(uid, pin, allowed_roles):
+    """
+    ตรวจสอบรหัสผ่านและสิทธิ์
+    allowed_roles: รายชื่อบทบาทที่อนุญาตให้เข้าหน้านั้น ๆ
+    """
     df = load_users_df()
     user = df[df["teacher_id"] == str(uid).strip()]
     if user.empty:
@@ -185,8 +231,12 @@ def check_login(uid, pin, allowed_roles):
     u = user.iloc[0]
     if str(u["pin"]) != str(pin).strip():
         return False, None, "🔒 PIN ไม่ถูกต้อง"
-    if allowed_roles and u["role"] not in allowed_roles:
+
+    # รองรับทั้ง role เดี่ยว และหลาย role ด้วย comma
+    u_roles = [r.strip() for r in str(u["role"]).lower().split(",") if r.strip()]
+    if allowed_roles and not any(r in allowed_roles for r in u_roles):
         return False, None, "🚫 ไม่มีสิทธิ์เข้าหน้านี้"
+
     return True, u, None
 
 
@@ -194,7 +244,8 @@ def check_login(uid, pin, allowed_roles):
 # Layout Elements
 # ======================
 def footer_once():
-    if st.session_state.get("_footer_done"): return
+    if st.session_state.get("_footer_done"):
+        return
     st.session_state["_footer_done"] = True
     st.markdown("<hr class='kys-hr'/>", unsafe_allow_html=True)
     st.markdown("""
@@ -203,6 +254,7 @@ def footer_once():
           School HR System v2 | Powered by Streamlit + Google Sheets
         </div>
     """, unsafe_allow_html=True)
+
 
 def role_card(title, subtitle, items, button_key, route_name):
     st.markdown("<div class='kys-card'>", unsafe_allow_html=True)
@@ -216,8 +268,9 @@ def role_card(title, subtitle, items, button_key, route_name):
         st.session_state["route"] = route_name
         st.rerun()
 
+
 def contact_block():
-    st.markdown(f"""
+    st.markdown("""
         <div class="kys-contact-wrap">
           <a class="kys-contact" href="mailto:pakka555@gmail.com">📧 ติดต่อผู้ดูแลระบบ</a>
         </div>
@@ -228,49 +281,47 @@ def contact_block():
 # Pages
 # ======================
 def page_home():
-    # แสดงแบนเนอร์จาก assets (โลโก้ + ข้อความซ้อนบนรูป)
     show_banner()
 
     st.markdown("<div class='page-wrap'>", unsafe_allow_html=True)
     st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
     st.markdown("<div class='kys-sub'>ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</div>", unsafe_allow_html=True)
 
-    role_card("👩‍🏫 สำหรับครูผู้สอน","Teacher",[
+    role_card("👩‍🏫 สำหรับครูผู้สอน", "Teacher", [
         "จัดการ/ปรับปรุงข้อมูลส่วนบุคคล",
         "ส่งคำขอลา/ไปราชการ/อบรม ฯลฯ และตรวจสอบสถานะ",
         "อัปโหลดเอกสารงานบุคคล (ฟอร์ม/ใบอนุญาต/แฟ้มสะสมงาน)"
-    ],"go_teacher","login_teacher")
+    ], "go_teacher", "login_teacher")
 
-    role_card("⚙️ ผู้ดูแลโมดูล","Module Admin",[
+    role_card("⚙️ ผู้ดูแลโมดูล", "Module Admin", [
         "ตรวจสอบ/อนุมัติคำขอในโมดูลที่รับผิดชอบ",
         "ติดตามเอกสาร ปรับแก้ข้อมูลที่จำเป็น",
         "ดูสรุปสถิติและรายงานในโมดูล"
-    ],"go_module_admin","login_module_admin")
+    ], "go_module_admin", "login_module_admin")
 
-    role_card("🛡️ แอดมินใหญ่","Superadmin",[
+    role_card("🛡️ แอดมินใหญ่", "Superadmin", [
         "กำกับดูแลภาพรวมของระบบทั้งหมด",
         "จัดการข้อมูลบุคลากร/สิทธิ์การเข้าใช้",
         "ออกรายงานภาพรวมเพื่อการบริหาร"
-    ],"go_superadmin","login_superadmin")
+    ], "go_superadmin", "login_superadmin")
 
-    role_card("🏫 ฝ่ายบริหาร (Executive)","Executive",[
+    role_card("🏫 ฝ่ายบริหาร (Executive)", "Executive", [
         "สำหรับผู้บริหารโรงเรียน",
         "ดูรายงานภาพรวมทั้งหมด"
-    ],"go_exec","login_executive")
+    ], "go_exec", "login_executive")
 
     contact_block()
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# (หน้าล็อกอินและ portal เหมือนเดิม)
 def login_page(title, roles, next_route):
     st.markdown(f"<h3 class='kys-title'>{title}</h3>", unsafe_allow_html=True)
     with st.form("login_form"):
         uid = st.text_input("User ID / Teacher ID")
         pin = st.text_input("PIN", type="password")
         if st.form_submit_button("เข้าสู่ระบบ"):
-            ok, user, err = check_login(uid, pin, roles)
+            ok, user, err = check_login(uid, pin, [r.lower() for r in roles])
             if not ok:
                 st.error(err)
             else:
@@ -278,31 +329,35 @@ def login_page(title, roles, next_route):
                 st.session_state["user"] = dict(user)
                 st.session_state["route"] = next_route
                 st.rerun()
-    st.button("⬅️ กลับหน้าหลัก", on_click=lambda: st.session_state.update({"route":"home"}))
+    st.button("⬅️ กลับหน้าหลัก", on_click=lambda: st.session_state.update({"route": "home"}))
     footer_once()
+
 
 def teacher_portal():
     st.success("เข้าสู่ระบบในบทบาท: ครูผู้สอน")
     st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูของครู")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route":"home"}))
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
     footer_once()
+
 
 def module_portal():
     st.success("เข้าสู่ระบบในบทบาท: ผู้ดูแลโมดูล")
     st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูของผู้ดูแลโมดูล")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route":"home"}))
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
     footer_once()
+
 
 def superadmin_portal():
     st.success("เข้าสู่ระบบในบทบาท: แอดมินใหญ่")
     st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูของแอดมินใหญ่")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route":"home"}))
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
     footer_once()
+
 
 def executive_portal():
     st.success("เข้าสู่ระบบในบทบาท: ฝ่ายบริหาร (Executive)")
     st.info("หน้าตัวอย่างสำหรับต่อยอดรายงานภาพรวม")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route":"home"}))
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
     footer_once()
 
 
@@ -310,17 +365,21 @@ def executive_portal():
 # Route Controller
 # ======================
 def main():
-    route = st.session_state.get("route","home")
+    # init route ครั้งแรก
+    if "route" not in st.session_state:
+        st.session_state["route"] = "home"
+
+    route = st.session_state.get("route", "home")
     if route == "home":
         page_home()
     elif route == "login_teacher":
-        login_page("👩‍🏫 เข้าสู่ระบบครูผู้สอน", ["teacher","module_admin","superadmin"], "teacher_portal")
+        login_page("👩‍🏫 เข้าสู่ระบบครูผู้สอน", ["teacher", "module_admin", "superadmin"], "teacher_portal")
     elif route == "login_module_admin":
-        login_page("⚙️ เข้าสู่ระบบผู้ดูแลโมดูล", ["module_admin","superadmin"], "module_portal")
+        login_page("⚙️ เข้าสู่ระบบผู้ดูแลโมดูล", ["module_admin", "superadmin"], "module_portal")
     elif route == "login_superadmin":
         login_page("🛡️ เข้าสู่ระบบแอดมินใหญ่", ["superadmin"], "superadmin_portal")
     elif route == "login_executive":
-        login_page("🏫 เข้าสู่ระบบฝ่ายบริหาร (Executive)", ["executive","superadmin"], "executive_portal")
+        login_page("🏫 เข้าสู่ระบบฝ่ายบริหาร (Executive)", ["executive", "superadmin"], "executive_portal")
     elif route == "teacher_portal":
         teacher_portal()
     elif route == "module_portal":
@@ -329,6 +388,7 @@ def main():
         superadmin_portal()
     elif route == "executive_portal":
         executive_portal()
+
 
 if __name__ == "__main__":
     main()
