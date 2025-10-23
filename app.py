@@ -31,78 +31,75 @@ if "user" not in st.session_state:
 # Helpers: CSS & Navigation
 # ==============================
 def inject_fonts_and_css():
-    st.markdown(
-        f"""
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
-        <style>
-          :root{{
-            --brand: {BRAND_PRIMARY};
-            --muted: {BRAND_MUTED};
-            --bg-card: #ffffff;
-            --bg-soft: #f5f8fb;
-            --shadow: 0 10px 30px rgba(10,35,66,0.08);
-            --radius: 16px;
-          }}
-          html, body, [class*="css"] {{
-            font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
-          }}
-          .block-container {{ max-width: 1220px !important; }}
+    css = f"""
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
+      :root {{
+        --brand: {BRAND_PRIMARY};
+        --muted: {BRAND_MUTED};
+        --bg-card: #ffffff;
+        --bg-soft: #f5f8fb;
+        --shadow: 0 10px 30px rgba(10,35,66,0.08);
+        --radius: 16px;
+      }}
+      html, body, [class*="css"] {{
+        font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }}
+      .block-container {{ max-width: 1220px !important; }}
 
-          .kys-banner {{
-            border-radius: var(--radius);
-            overflow: hidden; box-shadow: var(--shadow);
-            margin: 6px 0 18px 0;
-          }}
+      .kys-banner {{
+        border-radius: var(--radius);
+        overflow: hidden; box-shadow: var(--shadow);
+        margin: 6px 0 18px 0;
+      }}
 
-          .kys-title h1 {{
-            margin: 12px 0 6px 0; font-size: clamp(26px,2.6vw,36px);
-            font-weight: 800; color: var(--brand); text-align:center;
-          }}
-          .kys-title p {{ margin:0; text-align:center; color:var(--muted) }}
+      .kys-title h1 {{
+        margin: 12px 0 6px 0; font-size: clamp(26px,2.6vw,36px);
+        font-weight: 800; color: var(--brand); text-align:center;
+      }}
+      .kys-title p {{ margin:0; text-align:center; color:var(--muted) }}
 
-          .kys-grid {{
-            display:grid; gap:26px; margin-top:16px;
-            grid-template-columns: repeat(3,1fr);
-          }}
-          @media (max-width:1100px) {{ .kys-grid {{ grid-template-columns: repeat(2,1fr); }} }}
-          @media (max-width:760px)  {{ .kys-grid {{ grid-template-columns: 1fr; }} }}
+      .kys-grid {{
+        display:grid; gap:26px; margin-top:16px;
+        grid-template-columns: repeat(3,1fr);
+      }}
+      @media (max-width:1100px) {{ .kys-grid {{ grid-template-columns: repeat(2,1fr); }} }}
+      @media (max-width:760px)  {{ .kys-grid {{ grid-template-columns: 1fr; }} }}
 
-          .kys-card {{
-            background:var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 22px 22px 16px;
-            display:flex; flex-direction:column; min-height: 300px;
-          }}
-          .kys-card h3 {{ margin: 0 0 6px 0; font-weight:800; color:var(--brand) }}
-          .kys-card h4 {{ margin: 0 0 10px 0; font-weight:600; color:var(--muted) }}
-          .kys-card ul {{ margin: 10px 0 0 18px; color:#314657; line-height:1.65 }}
+      .kys-card {{
+        background:var(--bg-card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 22px 22px 16px;
+        display:flex; flex-direction:column; min-height: 300px;
+      }}
+      .kys-card h3 {{ margin: 0 0 6px 0; font-weight:800; color:var(--brand) }}
+      .kys-card h4 {{ margin: 0 0 10px 0; font-weight:600; color:var(--muted) }}
+      .kys-card ul {{ margin: 10px 0 0 18px; color:#314657; line-height:1.65 }}
 
-          .kys-btn {{
-            display:inline-flex; align-items:center; justify-content:center;
-            gap:8px; padding: 12px 16px; border-radius: 12px;
-            background: var(--brand); color: #fff !important; text-decoration:none !important;
-            box-shadow: var(--shadow); min-height: 44px;
-          }}
-          .kys-btn:hover {{ filter:brightness(1.06); }}
+      .kys-btn {{
+        display:inline-flex; align-items:center; justify-content:center;
+        gap:8px; padding: 12px 16px; border-radius: 12px;
+        background: var(--brand); color: #fff !important; text-decoration:none !important;
+        box-shadow: var(--shadow); min-height: 44px;
+      }}
+      .kys-btn:hover {{ filter:brightness(1.06); }}
 
-          .kys-contact {{ width:100%; display:flex; justify-content:flex-end; margin-top:18px; }}
-          .kys-pill-link {{
-            display:inline-flex; align-items:center; gap:8px; padding: 10px 14px;
-            border-radius: 999px; background:#0f2748; color:#fff !important; text-decoration:none; box-shadow: var(--shadow);
-          }}
+      .kys-contact {{ width:100%; display:flex; justify-content:flex-end; margin-top:18px; }}
+      .kys-pill-link {{
+        display:inline-flex; align-items:center; gap:8px; padding: 10px 14px;
+        border-radius: 999px; background:#0f2748; color:#fff !important; text-decoration:none; box-shadow: var(--shadow);
+      }}
 
-          .kys-loginbox {{
-            background:var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
-            padding: 18px 18px;
-          }}
+      .kys-loginbox {{
+        background:var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
+        padding: 18px 18px;
+      }}
 
-          .kys-back {{ margin-top:12px; }}
-        </style>
-        """,
-        unsafe_allow_html=True,
+      .kys-back {{ margin-top:12px; }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
     )
 
 def go(route: str):
