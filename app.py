@@ -126,7 +126,7 @@ def footer_once():
     st.markdown(
         """
         <div class="kys-footer">
-          พัฒนาโดย <b>ครูสุพจน์ บ้านกวักดอก</b> โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br/>
+          พัฒนาโดย <b>ครูสุพจน์ นามโคตร</b> กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br/>
           School HR System v2 | Powered by Streamlit + Google Sheets
         </div>
         """, unsafe_allow_html=True
