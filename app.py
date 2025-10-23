@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import gspread
@@ -9,37 +10,30 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(page_title="School HR System", page_icon="🏫", layout="wide")
 
 # ==========================
+# 📁 พาธรูปในโปรเจกต์ (แบนเนอร์)
+# ==========================
+ASSETS_DIR = "assets"
+BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")  # ใส่รูปชื่อ banner.jpg ไว้ในโฟลเดอร์ assets/
+
+# ==========================
 # 🎨 CSS และฟอนต์
 # ==========================
 def inject_fonts_and_css():
     css = """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
-    html, body, [class*="css"] {
-        font-family: 'Noto Sans Thai', sans-serif;
-    }
+    html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
     .kys-card {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-        padding: 24px 22px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 280px;
+        background: #fff; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        padding: 24px 22px; display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;
     }
     .kys-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px 18px;
-        border-radius: 10px;
-        background: #0056b3;
-        color: #fff !important;
-        font-weight: 600;
-        text-decoration: none !important;
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 10px 18px; border-radius: 10px; background: #0a3a75; color: #fff !important;
+        font-weight: 600; text-decoration: none !important;
     }
-    .kys-btn:hover { background: #003d80; }
+    .kys-btn:hover { background: #052956; }
+    .kys-banner { border-radius: 14px; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.10); margin-bottom: 18px; }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -70,6 +64,10 @@ def load_users_df():
         ws = sh.worksheet(ws_name)
         data = ws.get_all_records()
         df = pd.DataFrame(data).fillna("")
+        # ปรับชนิด/รูปแบบ
+        for col in ["teacher_id", "pin", "role", "name", "email"]:
+            if col not in df.columns:
+                df[col] = ""
         df["teacher_id"] = df["teacher_id"].astype(str).str.strip()
         df["pin"] = df["pin"].astype(str).str.strip()
         df["role"] = df["role"].astype(str).str.lower().str.strip()
@@ -96,47 +94,57 @@ def check_login(user_id, pin, allowed_roles):
 if "route" not in st.session_state:
     st.session_state["route"] = "home"
 
-route = st.session_state["route"]
-
 # ==========================
 # 🏠 หน้าแรก (Home)
 # ==========================
 def page_home():
-    st.image("https://i.imgur.com/IybX4sn.jpeg", use_column_width=True)
-    st.markdown("<h2 style='text-align:center;color:#003366;'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
-    st.markdown("ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลอย่างโปร่งใสและตรวจสอบได้")
+    # แสดงแบนเนอร์จากไฟล์ในโปรเจกต์ (ถ้าไม่มีจะไม่แสดง)
+    if os.path.exists(BANNER_PATH):
+        st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
+        st.image(BANNER_PATH, use_container_width=True)  # ✅ ใช้ use_container_width
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    col1, col2, col3, col4 = st.columns(4)
+    st.markdown(
+        "<h2 style='text-align:center;color:#0a3a75;'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='text-align:center;color:#48617a'>ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลอย่างโปร่งใสและตรวจสอบได้</p>",
+        unsafe_allow_html=True
+    )
+
+    col1, col2, col3, col4 = st.columns(4, gap="large")
+
     with col1:
         st.subheader("👩‍🏫 สำหรับครูผู้สอน")
         st.write("- จัดการ/ปรับปรุงข้อมูลส่วนบุคคล\n- ส่งคำขอลา/อบรม\n- อัปโหลดเอกสาร")
-        if st.button("🔐 เข้าสู่ระบบครูผู้สอน"):
+        if st.button("🔐 เข้าสู่ระบบครูผู้สอน", use_container_width=True):
             st.session_state["route"] = "login_teacher"
             st.rerun()
 
     with col2:
         st.subheader("⚙️ ผู้ดูแลโมดูล")
         st.write("- ตรวจสอบ/อนุมัติคำขอในโมดูล\n- ดูสถิติและรายงานในโมดูล")
-        if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล"):
+        if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
             st.session_state["route"] = "login_module_admin"
             st.rerun()
 
     with col3:
         st.subheader("🛡️ แอดมินใหญ่")
         st.write("- จัดการสิทธิ์เข้าระบบ\n- ออกรายงานรวมเพื่อบริหาร")
-        if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่"):
+        if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
             st.session_state["route"] = "login_superadmin"
             st.rerun()
 
     with col4:
         st.subheader("🏫 ฝ่ายบริหาร (Executive)")
         st.write("- สำหรับผู้บริหารโรงเรียน\n- ดูรายงานภาพรวมทั้งหมด")
-        if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร"):
+        if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร", use_container_width=True):
             st.session_state["route"] = "login_executive"
             st.rerun()
 
 # ==========================
-# 🔑 หน้าล็อกอิน
+# 🔑 หน้าล็อกอิน (รวมใช้ได้ทุกบทบาท)
 # ==========================
 def login_page(title, roles, next_route):
     st.markdown(f"### {title}")
@@ -160,25 +168,41 @@ def login_page(title, roles, next_route):
 # ==========================
 # 🧩 Portal ตัวอย่างแต่ละบทบาท
 # ==========================
+def _logout_btn():
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
+
+def _require_role(roles):
+    u = st.session_state.get("user")
+    if not u or u.get("role") not in roles:
+        st.warning("โปรดเข้าสู่ระบบด้วยสิทธิ์ที่ถูกต้อง")
+        if st.button("กลับหน้าหลัก"):
+            st.session_state["route"] = "home"
+            st.rerun()
+        st.stop()
+
 def teacher_portal():
+    _require_role(["teacher", "module_admin", "superadmin"])
     st.success("เข้าสู่ระบบในบทบาท: ครูผู้สอน")
     st.write("นี่คือตัวอย่างหน้า Portal สำหรับครู")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home"}))
+    _logout_btn()
 
 def module_portal():
+    _require_role(["module_admin", "superadmin"])
     st.success("เข้าสู่ระบบในบทบาท: ผู้ดูแลโมดูล")
     st.write("นี่คือตัวอย่างหน้า Portal สำหรับผู้ดูแลโมดูล")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home"}))
+    _logout_btn()
 
 def superadmin_portal():
+    _require_role(["superadmin"])
     st.success("เข้าสู่ระบบในบทบาท: แอดมินใหญ่")
     st.write("นี่คือตัวอย่างหน้า Portal สำหรับแอดมินใหญ่")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home"}))
+    _logout_btn()
 
 def executive_portal():
+    _require_role(["executive", "superadmin"])
     st.success("เข้าสู่ระบบในบทบาท: ฝ่ายบริหาร (Executive)")
     st.write("นี่คือตัวอย่างหน้า Portal สำหรับฝ่ายบริหาร")
-    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home"}))
+    _logout_btn()
 
 # ==========================
 # 🚦 Route Controller
