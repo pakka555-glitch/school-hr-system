@@ -106,12 +106,11 @@ def inject_fonts_and_css():
     )
 
 def go(route: str):
-    """เปลี่ยนหน้า (route) + rerun"""
     st.session_state["route"] = route
     st.rerun()
 
 # ==============================
-# Auth (CSV-based) — same asเดิม
+# Auth (CSV-based)
 # ==============================
 REQUIRED_COLS = {"teacher_id","name","email","department","pin","role","admin_modules"}
 
@@ -130,14 +129,13 @@ def load_users() -> pd.DataFrame:
 def get_user(tid: str):
     df = load_users()
     if df.empty:
-        # demo mode: mock user
         return {
             "teacher_id": tid,
             "name": "ผู้ใช้สาธิต",
             "email": "",
             "department": "",
             "pin": "1234",
-            "role": "teacher",         # ค่าเริ่มต้น
+            "role": "teacher",
             "admin_modules": "",
         }
     m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
@@ -158,13 +156,11 @@ def check_login(tid: str, pin: str):
 def page_home():
     inject_fonts_and_css()
 
-    # 1) Banner (ถ้ามี)
     if os.path.exists(BANNER_PATH):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2) Title & Subtitle
     st.markdown(
         f"""
         <div class="kys-title">
@@ -175,7 +171,6 @@ def page_home():
         unsafe_allow_html=True,
     )
 
-    # 3) Grid 3 ใบ (ครู / ผู้ดูแลโมดูล / แอดมินใหญ่)
     st.markdown('<div class="kys-grid">', unsafe_allow_html=True)
 
     # --- Teacher Card ---
@@ -195,7 +190,8 @@ def page_home():
             """,
             unsafe_allow_html=True,
         )
-        st.link_button("🔐 ไปหน้าเข้าสู่ระบบครู", "#", help="ไปหน้า Login ครู", on_click=lambda: go("login_teacher"), use_container_width=True)
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบครู", use_container_width=True):
+            go("login_teacher")
         st.markdown("</div>", unsafe_allow_html=True)
 
     # --- Module Admin Card ---
@@ -215,7 +211,8 @@ def page_home():
             """,
             unsafe_allow_html=True,
         )
-        st.link_button("🔐 ไปหน้าเข้าสู่ระบบผู้ดูแลโมดูล", "#", on_click=lambda: go("login_module"), use_container_width=True)
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
+            go("login_module")
         st.markdown("</div>", unsafe_allow_html=True)
 
     # --- Superadmin Card ---
@@ -235,12 +232,13 @@ def page_home():
             """,
             unsafe_allow_html=True,
         )
-        st.link_button("🔐 ไปหน้าเข้าสู่ระบบแอดมินใหญ่", "#", on_click=lambda: go("login_superadmin"), use_container_width=True)
+        if st.button("🔐 ไปหน้าเข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
+            go("login_superadmin")
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 4) Executive section (แสดงเดี่ยวด้านล่าง)
+    # --- Executive Card (single row under grid) ---
     with st.container():
         st.markdown(
             """
@@ -252,10 +250,10 @@ def page_home():
             """,
             unsafe_allow_html=True,
         )
-        st.link_button("🔐 ไปยังหน้าฝ่ายบริหาร", "#", on_click=lambda: go("login_executive"), use_container_width=True)
+        if st.button("🔐 ไปยังหน้าฝ่ายบริหาร", use_container_width=True):
+            go("login_executive")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 5) ติดต่อผู้ดูแล
     st.markdown(
         f"""
         <div class="kys-contact">
@@ -265,7 +263,6 @@ def page_home():
         unsafe_allow_html=True,
     )
 
-    # 6) Footer
     st.markdown(
         """
         <hr style="margin-top:26px;margin-bottom:12px;border:1px solid #e0e6ec;">
@@ -279,7 +276,6 @@ def page_home():
 
 # ---------- Login pages ----------
 def page_login(role_key: str, title: str, allow_roles: list, next_route: str):
-    """Generic login page for a role"""
     inject_fonts_and_css()
 
     st.markdown(f"<h2 style='text-align:center;color:{BRAND_PRIMARY}'>{title}</h2>", unsafe_allow_html=True)
@@ -293,7 +289,6 @@ def page_login(role_key: str, title: str, allow_roles: list, next_route: str):
             if not success:
                 st.error(err)
             else:
-                # ตรวจสิทธิ์
                 role = str(u.get("role","")).strip().lower()
                 if role in [r.lower() for r in allow_roles]:
                     st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
@@ -302,7 +297,8 @@ def page_login(role_key: str, title: str, allow_roles: list, next_route: str):
                 else:
                     st.error("สิทธิ์ไม่เพียงพอสำหรับเมนูนี้")
     st.markdown("</div>", unsafe_allow_html=True)
-    st.button("⬅️ กลับหน้าแรก", on_click=lambda: go("home"), use_container_width=False)
+    if st.button("⬅️ กลับหน้าแรก"):
+        go("home")
 
 # ---------- Portals (placeholder) ----------
 def page_portal(title: str):
@@ -311,11 +307,14 @@ def page_portal(title: str):
     u = st.session_state.get("user")
     if not u:
         st.warning("ยังไม่ได้เข้าสู่ระบบ", icon="⚠️")
-        st.button("⬅️ กลับหน้าแรก", on_click=lambda: go("home"))
+        if st.button("⬅️ กลับหน้าแรก"):
+            go("home")
         return
     st.success(f"ล็อกอินเป็น: {u.get('name','')}  (role: {u.get('role','')})")
     st.info("หน้านี้เว้นไว้ต่อยอดฟังก์ชันจริงของบทบาทนี้ครับ")
-    st.button("🚪 ออกจากระบบ", on_click=lambda: (st.session_state.update(user=None), go("home")))
+    if st.button("🚪 ออกจากระบบ"):
+        st.session_state["user"] = None
+        go("home")
 
 # ==============================
 # App — Routing
@@ -357,7 +356,6 @@ def main():
             next_route="portal_executive",
         )
 
-    # portals (ตัวอย่าง)
     elif route == "portal_teacher":
         page_portal("พอร์ทัลสำหรับครูผู้สอน")
     elif route == "portal_module":
