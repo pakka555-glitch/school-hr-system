@@ -146,37 +146,36 @@ def inject_css():
 
 inject_css()
 
+# ======================
+# Google Sheets client (robust)
+# ======================
+import json
+import textwrap
 
-# ======================
-# Google Sheets
-# ======================
 @st.cache_resource(show_spinner=False)
 def get_gs_client():
-    info = dict(st.secrets["gcp_service_account"])
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive.readonly",
-    ]
-    creds = Credentials.from_service_account_info(info, scopes=scopes)
-    return gspread.authorize(creds)
-
-@st.cache_data(ttl=60)
-def load_users_df():
     try:
-        client = get_gs_client()
-        sheet_id = st.secrets["gsheets"]["users_sheet_id"]
-        ws_name = st.secrets["gsheets"]["users_worksheet"]
-        sh = client.open_by_key(sheet_id)
-        ws = sh.worksheet(ws_name)
-        data = ws.get_all_records()
-        df = pd.DataFrame(data).fillna("")
-        for col in ("teacher_id","pin","role"):
-            if col in df: df[col] = df[col].astype(str).str.strip()
-        if "role" in df: df["role"] = df["role"].str.lower()
-        return df
+        # 1) เอาค่าจาก secrets ตรง ๆ
+        info = dict(st.secrets["gcp_service_account"])
+
+        # 2) ทำให้ private_key กลายเป็นบรรทัดจริงแน่นอน
+        pk = info.get("private_key", "")
+        # กรณีที่คีย์เป็นสตริงแบบมี \n อยู่ในข้อความ ให้แปลงเป็น line break จริง ๆ
+        if "\\n" in pk:
+            pk = pk.replace("\\n", "\n")
+        # เผื่อคีย์ถูกเก็บเป็น single-line PEM
+        pk = textwrap.dedent(pk).strip()
+        info["private_key"] = pk
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive.readonly",
+        ]
+        creds = Credentials.from_service_account_info(info, scopes=scopes)
+        return gspread.authorize(creds)
     except Exception as e:
-        st.error(f"ไม่สามารถโหลดข้อมูลผู้ใช้ได้: {e}")
-        return pd.DataFrame(columns=["teacher_id","name","email","role","pin"])
+        st.error(f"ไม่สามารถสร้างไคลเอนต์ Google Sheets ได้: {e}")
+        raise
 
 def check_login(uid, pin, allowed_roles):
     df = load_users_df()
