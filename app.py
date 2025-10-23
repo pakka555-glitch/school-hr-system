@@ -100,7 +100,6 @@ def inject_fonts_and_css():
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-    )
 
 def go(route: str):
     st.session_state["route"] = route
