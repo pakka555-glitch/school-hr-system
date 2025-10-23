@@ -310,14 +310,12 @@ def show_home():
     )
 
 def show_executive_portal():
-    """หน้าเฉพาะฝ่ายบริหาร (แยกจากหน้าแรก)"""
+    # ใส่ CSS/ฟอนต์ให้เหมือนหน้าที่เหลือ
     inject_fonts_and_css()
+    st.title("พื้นที่สำหรับฝ่ายบริหาร (Executive)")
+    st.info("หน้านี้สำหรับผู้อำนวยการ / รองผู้อำนวยการ เท่านั้น")
+    # TODO: ต่อเติมเมนู/รายงาน/สรุปต่าง ๆ ที่ฝ่ายบริหารต้องใช้
 
-    st.markdown("<h2>🏫 ฝ่ายบริหาร (Executive)</h2>", unsafe_allow_html=True)
-    st.markdown(
-        "<p class='muted'>สำหรับผู้อำนวยการ / รองผู้อำนวยการ</p>",
-        unsafe_allow_html=True,
-    )
 
     with st.form("login_executive"):
         tid = st.text_input("Executive ID")
@@ -355,28 +353,25 @@ def show_admin_portal():
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
 
-    # Sidebar menu (ยังคงไว้เหมือนเดิม)
+    # --- Sidebar ---
     with st.sidebar:
         st.markdown("### เมนู")
         st.session_state["menu"] = st.radio(
             "ไปหน้า:",
-            ["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล"],
-            index=["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล"].index(st.session_state["menu"]),
+            ["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล", "ฝ่ายบริหาร"],
+            index=["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล", "ฝ่ายบริหาร"].index(st.session_state.get("menu", "หน้าแรก")),
             label_visibility="collapsed",
         )
 
-    # Routing หลัก
-    if st.session_state["route"] == "executive":
-        show_executive_portal()
-        return
-
-    # หน้าในเมนูเดิม
+    # --- Routing ---
     if st.session_state["menu"] == "หน้าแรก":
         show_home()
     elif st.session_state["menu"] == "สำหรับผู้ใช้":
         show_teacher_portal()
-    else:
+    elif st.session_state["menu"] == "สำหรับผู้ดูแล":
         show_admin_portal()
+    else:  # "ฝ่ายบริหาร"
+        show_executive_portal()
 
 if __name__ == "__main__":
     main()
