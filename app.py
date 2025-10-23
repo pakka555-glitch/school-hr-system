@@ -21,36 +21,67 @@ def inject_fonts_and_css():
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
 
-    /* โครงการ์ด */
+    /* การ์ด */
     [data-testid="stContainer"] {
         border-radius: 14px !important;
         padding: 18px 20px !important;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
         background: #fff;
         position: relative;
     }
 
-    /* ให้ทุกปุ่มมีสีเข้มชัดแน่นอน */
-    .stButton > button {
+    /* accent bar */
+    [data-testid="stContainer"]:nth-of-type(1)::before {background-color:#1565C0;}
+    [data-testid="stContainer"]:nth-of-type(2)::before {background-color:#6A1B9A;}
+    [data-testid="stContainer"]:nth-of-type(3)::before {background-color:#01579B;}
+    [data-testid="stContainer"]:nth-of-type(4)::before {background-color:#2E7D32;}
+    [data-testid="stContainer"]::before {
+        content:"";
+        position:absolute;
+        top:0; left:0; right:0; height:6px;
+        border-top-left-radius:14px; border-top-right-radius:14px;
+    }
+
+    /* ความสูงเนื้อหาเท่ากัน */
+    .role-body {
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* ปุ่มเข้าสู่ระบบ — สีเข้ม สดใส พร้อม hover shadow */
+    .stButton>button {
         width: 100% !important;
-        background: #0D47A1 !important;     /* 🔵 น้ำเงินกรมเข้ม */
         color: #fff !important;
-        border: none !important;
-        border-radius: 10px !important;
-        padding: 10px 0 !important;
-        font-weight: 700 !important;
-        font-size: 15px !important;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.12) !important;
-        transition: all .2s ease !important;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 0;
+        font-weight: 600;
+        font-size: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: all 0.25s ease;
     }
-    .stButton > button:hover {
-        background: #002171 !important;     /* เข้มขึ้นตอน hover */
-        box-shadow: 0 6px 16px rgba(0,0,0,0.22) !important;
-        transform: translateY(-1px);
-    }
+
+    div[data-testid="column"]:nth-of-type(1) .stButton>button {background:#0D47A1;}
+    div[data-testid="column"]:nth-of-type(1) .stButton>button:hover {background:#002171; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
+
+    div[data-testid="column"]:nth-of-type(2) .stButton>button {background:#7B1FA2;}
+    div[data-testid="column"]:nth-of-type(2) .stButton>button:hover {background:#4A148C; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
+
+    div[data-testid="column"]:nth-of-type(3) .stButton>button {background:#004C8C;}
+    div[data-testid="column"]:nth-of-type(3) .stButton>button:hover {background:#002C5F; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
+
+    div[data-testid="column"]:nth-of-type(4) .stButton>button {background:#1B5E20;}
+    div[data-testid="column"]:nth-of-type(4) .stButton>button:hover {background:#0B3D02; box-shadow:0 4px 14px rgba(0,0,0,0.25);}
+
+    /* Footer */
+    .footer {text-align:center;color:gray;font-size:14px;margin-top:40px;}
+    .footer img {width:20px;vertical-align:middle;margin:0 4px;opacity:0.7;}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+
 
 
 # ==========================
