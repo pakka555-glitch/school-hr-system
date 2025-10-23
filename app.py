@@ -82,8 +82,6 @@ def inject_fonts_and_css():
     """
     st.markdown(css, unsafe_allow_html=True)
 
-
-
 # ==========================
 # 🔗 เชื่อม Google Sheets
 # ==========================
