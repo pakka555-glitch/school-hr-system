@@ -1,4 +1,6 @@
 # app.py
+import os
+import base64
 import streamlit as st
 import pandas as pd
 import gspread
@@ -8,7 +10,53 @@ from google.oauth2.service_account import Credentials
 # ตั้งค่าหน้าเว็บ
 # ======================
 st.set_page_config(page_title="School HR System", page_icon="🏫", layout="wide")
-BANNER_URL = "https://i.imgur.com/IybX4sn.jpeg"   # 👈 เปลี่ยน URL นี้ได้ตามต้องการ
+
+# --- ใช้ไฟล์รูปภายในโปรเจกต์ ---
+ASSETS_DIR   = os.path.join(os.path.dirname(__file__), "assets")
+BANNER_PATH  = os.path.join(ASSETS_DIR, "banner.jpg")
+LOGO_PATH    = os.path.join(ASSETS_DIR, "logo.jpg")
+
+
+# ======================
+# Utilities (Banner/Logo)
+# ======================
+def _img_to_data_uri(path: str) -> str:
+    """อ่านรูปจากไฟล์และแปลงเป็น data URI (base64) สำหรับใช้ใน <img>"""
+    try:
+        with open(path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode("utf-8")
+        ext = os.path.splitext(path)[1].lower().replace(".", "")
+        if ext in {"jpg", "jpeg"}:
+            mime = "image/jpeg"
+        elif ext == "png":
+            mime = "image/png"
+        else:
+            mime = "image/jpeg"
+        return f"data:{mime};base64,{encoded}"
+    except Exception:
+        return ""
+
+
+def show_banner():
+    """แสดงแบนเนอร์จาก assets พร้อมโลโก้และข้อความซ้อนบนรูป"""
+    banner_uri = _img_to_data_uri(BANNER_PATH)
+    logo_uri   = _img_to_data_uri(LOGO_PATH)
+
+    if not banner_uri:
+        st.warning("⚠️ ไม่พบไฟล์แบนเนอร์ (assets/banner.jpg)")
+        return
+
+    st.markdown(
+        f"""
+        <div class="hero">
+          <img class="hero-img" src="{banner_uri}" alt="banner"/>
+          {"<img class='hero-logo' src='"+logo_uri+"' alt='logo'/>" if logo_uri else ""}
+          <div class="hero-title">โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 # ======================
 # CSS / Fonts
@@ -31,10 +79,42 @@ def inject_css():
           .kys-title{ text-align:center; color:var(--brand); font-weight:800; margin: 12px 0 6px 0; }
           .kys-sub{ text-align:center; color:var(--muted); font-size:14.5px; margin-bottom: 18px; }
 
-          .banner {
-            width:100%; border-radius:12px;
-            box-shadow:var(--shadow);
-            margin-bottom:14px;
+          /* ==== HERO / Banner ==== */
+          .hero{
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin: 6px 0 14px 0;
+          }
+          .hero-img{
+            width: 100%;
+            display: block;
+          }
+          .hero-logo{
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            width: 72px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,.25);
+            background: #fff;
+            padding: 6px;
+          }
+          .hero-title{
+            position: absolute;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            color: #fff;
+            font-weight: 800;
+            font-size: clamp(18px, 2.2vw, 28px);
+            text-shadow: 0 6px 16px rgba(0,0,0,.6);
+            background: rgba(0,0,0,.22);
+            padding: 8px 14px;
+            border-radius: 12px;
           }
 
           .kys-card{
@@ -65,6 +145,7 @@ def inject_css():
     """, unsafe_allow_html=True)
 
 inject_css()
+
 
 # ======================
 # Google Sheets
@@ -109,6 +190,7 @@ def check_login(uid, pin, allowed_roles):
         return False, None, "🚫 ไม่มีสิทธิ์เข้าหน้านี้"
     return True, u, None
 
+
 # ======================
 # Layout Elements
 # ======================
@@ -142,11 +224,14 @@ def contact_block():
         </div>
     """, unsafe_allow_html=True)
 
+
 # ======================
 # Pages
 # ======================
 def page_home():
-    st.image(BANNER_URL, use_container_width=True, caption=None, output_format="auto")
+    # แสดงแบนเนอร์จาก assets (โลโก้ + ข้อความซ้อนบนรูป)
+    show_banner()
+
     st.markdown("<div class='page-wrap'>", unsafe_allow_html=True)
     st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
     st.markdown("<div class='kys-sub'>ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</div>", unsafe_allow_html=True)
@@ -177,6 +262,7 @@ def page_home():
     contact_block()
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
+
 
 # (หน้าล็อกอินและ portal เหมือนเดิม)
 def login_page(title, roles, next_route):
@@ -220,6 +306,7 @@ def executive_portal():
     st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route":"home"}))
     footer_once()
 
+
 # ======================
 # Route Controller
 # ======================
@@ -246,3 +333,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
