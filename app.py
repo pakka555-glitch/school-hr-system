@@ -183,31 +183,28 @@ def executive_portal():
 # ==========================
 # 🚦 Route Controller
 # ==========================
-if route == "home":
-    page_home()
-elif route == "login_teacher":
-    login_page("👩‍🏫 เข้าสู่ระบบครูผู้สอน", ["teacher", "module_admin", "superadmin"], "teacher_portal")
-elif route == "login_module_admin":
-    login_page("⚙️ เข้าสู่ระบบผู้ดูแลโมดูล", ["module_admin", "superadmin"], "module_portal")
-elif route == "login_superadmin":
-    login_page("🛡️ เข้าสู่ระบบแอดมินใหญ่", ["superadmin"], "superadmin_portal")
-elif route == "login_executive":
-    login_page("🏫 เข้าสู่ระบบฝ่ายบริหาร (Executive)", ["executive", "superadmin"], "executive_portal")
-elif route == "teacher_portal":
-    teacher_portal()
-elif route == "module_portal":
-    module_portal()
-elif route == "superadmin_portal":
-    superadmin_portal()
-elif route == "executive_portal":
-    executive_portal()
+def main():
+    route = st.session_state.get("route", "home")
 
+    if route == "home":
+        page_home()
+    elif route == "login_teacher":
+        login_page("👩‍🏫 เข้าสู่ระบบครูผู้สอน", ["teacher", "module_admin", "superadmin"], "teacher_portal")
+    elif route == "login_module_admin":
+        login_page("⚙️ เข้าสู่ระบบผู้ดูแลโมดูล", ["module_admin", "superadmin"], "module_portal")
+    elif route == "login_superadmin":
+        login_page("🛡️ เข้าสู่ระบบแอดมินใหญ่", ["superadmin"], "superadmin_portal")
+    elif route == "login_executive":
+        login_page("🏫 เข้าสู่ระบบฝ่ายบริหาร (Executive)", ["executive", "superadmin"], "executive_portal")
+    elif route == "teacher_portal":
+        teacher_portal()
+    elif route == "module_portal":
+        module_portal()
+    elif route == "superadmin_portal":
+        superadmin_portal()
+    elif route == "executive_portal":
+        executive_portal()
 
-
-
+# จุดเริ่มต้นของโปรแกรม
 if __name__ == "__main__":
     main()
-
-
-
-
