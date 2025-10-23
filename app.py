@@ -13,7 +13,7 @@ st.set_page_config(page_title="School HR System", page_icon="🏫", layout="wide
 # 📁 พาธรูปในโปรเจกต์ (แบนเนอร์)
 # ==========================
 ASSETS_DIR = "assets"
-BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")  # ใส่รูปชื่อ banner.jpg ไว้ในโฟลเดอร์ assets/
+BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")  # วางรูปชื่อ banner.jpg ในโฟลเดอร์ assets/
 
 # ==========================
 # 🎨 CSS และฟอนต์
@@ -23,17 +23,57 @@ def inject_fonts_and_css():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
+
+    /* === กรอบการ์ด === */
     .kys-card {
-        background: #fff; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-        padding: 24px 22px; display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        padding: 24px 22px;
+        transition: 0.3s;
+        border: 1px solid #e0e0e0;
+        min-height: 280px;
     }
+    .kys-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+    }
+
+    /* === ปุ่ม === */
     .kys-btn {
-        display: inline-flex; align-items: center; justify-content: center;
-        padding: 10px 18px; border-radius: 10px; background: #0a3a75; color: #fff !important;
-        font-weight: 600; text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 18px;
+        border-radius: 10px;
+        background: #0a3a75;
+        color: #fff !important;
+        font-weight: 600;
+        text-decoration: none !important;
     }
     .kys-btn:hover { background: #052956; }
-    .kys-banner { border-radius: 14px; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.10); margin-bottom: 18px; }
+
+    /* === แบนเนอร์ === */
+    .kys-banner {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.10);
+        margin-bottom: 18px;
+    }
+
+    /* === เครดิต === */
+    .footer {
+        text-align:center;
+        color:gray;
+        font-size:14px;
+        margin-top:40px;
+    }
+    .footer img {
+        width: 22px;
+        vertical-align: middle;
+        margin-right: 5px;
+        opacity: 0.7;
+    }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -64,7 +104,7 @@ def load_users_df():
         ws = sh.worksheet(ws_name)
         data = ws.get_all_records()
         df = pd.DataFrame(data).fillna("")
-        # ปรับชนิด/รูปแบบ
+        # ปรับชนิดข้อมูล
         for col in ["teacher_id", "pin", "role", "name", "email"]:
             if col not in df.columns:
                 df[col] = ""
@@ -98,10 +138,10 @@ if "route" not in st.session_state:
 # 🏠 หน้าแรก (Home)
 # ==========================
 def page_home():
-    # แสดงแบนเนอร์จากไฟล์ในโปรเจกต์ (ถ้าไม่มีจะไม่แสดง)
+    # ✅ แบนเนอร์
     if os.path.exists(BANNER_PATH):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
-        st.image(BANNER_PATH, use_container_width=True)  # ✅ ใช้ use_container_width
+        st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(
@@ -116,35 +156,60 @@ def page_home():
     col1, col2, col3, col4 = st.columns(4, gap="large")
 
     with col1:
+        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
         st.subheader("👩‍🏫 สำหรับครูผู้สอน")
         st.write("- จัดการ/ปรับปรุงข้อมูลส่วนบุคคล\n- ส่งคำขอลา/อบรม\n- อัปโหลดเอกสาร")
         if st.button("🔐 เข้าสู่ระบบครูผู้สอน", use_container_width=True):
             st.session_state["route"] = "login_teacher"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
+        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
         st.subheader("⚙️ ผู้ดูแลโมดูล")
         st.write("- ตรวจสอบ/อนุมัติคำขอในโมดูล\n- ดูสถิติและรายงานในโมดูล")
         if st.button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล", use_container_width=True):
             st.session_state["route"] = "login_module_admin"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with col3:
+        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
         st.subheader("🛡️ แอดมินใหญ่")
         st.write("- จัดการสิทธิ์เข้าระบบ\n- ออกรายงานรวมเพื่อบริหาร")
         if st.button("🔐 เข้าสู่ระบบแอดมินใหญ่", use_container_width=True):
             st.session_state["route"] = "login_superadmin"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with col4:
+        st.markdown('<div class="kys-card">', unsafe_allow_html=True)
         st.subheader("🏫 ฝ่ายบริหาร (Executive)")
         st.write("- สำหรับผู้บริหารโรงเรียน\n- ดูรายงานภาพรวมทั้งหมด")
         if st.button("🔐 เข้าสู่ระบบฝ่ายบริหาร", use_container_width=True):
             st.session_state["route"] = "login_executive"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # ==========================
+    # 🧑‍💻 เครดิตผู้พัฒนา (Footer)
+    # ==========================
+    st.markdown("---")
+    st.markdown(
+        """
+        <div class="footer">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+            พัฒนาโดย <b>ครูสุพจน์ นามโคตร</b> โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br>
+            School HR System v2 | Powered by 
+            <img src="https://streamlit.io/images/brand/streamlit-mark-color.png"> Streamlit + 
+            <img src="https://www.svgrepo.com/show/373589/google-sheets.svg"> Google Sheets
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # ==========================
-# 🔑 หน้าล็อกอิน (รวมใช้ได้ทุกบทบาท)
+# 🔑 หน้าล็อกอิน
 # ==========================
 def login_page(title, roles, next_route):
     st.markdown(f"### {title}")
@@ -229,6 +294,9 @@ def main():
     elif route == "executive_portal":
         executive_portal()
 
-# จุดเริ่มต้นของโปรแกรม
+# ==========================
+# ▶️ จุดเริ่มต้นของโปรแกรม
+# ==========================
 if __name__ == "__main__":
     main()
+
