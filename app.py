@@ -16,24 +16,15 @@ BANNER_PATH = os.path.join(ASSETS_DIR, "banner.jpg")
 # 🎨 CSS และฟอนต์
 # ==========================
 def inject_fonts_and_css():
-    css = """
+    st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
 
-    /* โครงการ์ด */
-    [data-testid="stContainer"] {
-        border-radius: 14px !important;
-        padding: 18px 20px !important;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        background: #fff;
-        position: relative;
-    }
-
-    /* ให้ทุกปุ่มมีสีเข้มชัดแน่นอน */
+    /* ปุ่มเข้าใช้งาน – สีเข้ม ชัดเจน และกว้างเท่ากันทุกใบ */
     .stButton > button {
         width: 100% !important;
-        background: #0D47A1 !important;     /* 🔵 น้ำเงินกรมเข้ม */
+        background: #0D47A1 !important;       /* น้ำเงินกรม */
         color: #fff !important;
         border: none !important;
         border-radius: 10px !important;
@@ -44,13 +35,12 @@ def inject_fonts_and_css():
         transition: all .2s ease !important;
     }
     .stButton > button:hover {
-        background: #002171 !important;     /* เข้มขึ้นตอน hover */
+        background: #002171 !important;       /* เข้มขึ้นตอน hover */
         box-shadow: 0 6px 16px rgba(0,0,0,0.22) !important;
         transform: translateY(-1px);
     }
     </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # ==========================
 # 🔗 เชื่อม Google Sheets
