@@ -200,7 +200,7 @@ def footer_once():
     st.markdown("<hr class='kys-hr'/>", unsafe_allow_html=True)
     st.markdown("""
         <div class="kys-footer">
-          พัฒนาโดย <b>ครูสุพจน์ นามโคตร</b> กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br/>
+          พัฒนาโดย <b>ครูสุพจน์ บ้านกวักดอก</b> โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด<br/>
           School HR System v2 | Powered by Streamlit + Google Sheets
         </div>
     """, unsafe_allow_html=True)
@@ -331,70 +331,5 @@ def main():
     elif route == "executive_portal":
         executive_portal()
 
-# ---------------------------
-# 1) ตั้งค่าค่าเริ่มต้นของ route (ไว้ตอนต้นไฟล์)
-# ---------------------------
-if "route" not in st.session_state:
-    st.session_state["route"] = "home"
-
-# ---------------------------
-# 2) หน้า Login (แก้ key ของปุ่ม submit)
-# ---------------------------
-def login_page():
-    st.title("🔐 เข้าสู่ระบบบุคลากรโรงเรียน")
-    st.markdown("**กรุณากรอก รหัสครู (Teacher ID) และ  PIN เพื่อเข้าสู่ระบบ**")
-
-    with st.form("login_form"):
-        uid = st.text_input("รหัสครู / Teacher ID")
-        pin = st.text_input("PIN", type="password")
-        submit = st.form_submit_button("เข้าสู่ระบบ", key="submit_login")   # ← key ไม่ซ้ำ
-
-    if submit:
-        ok, user, err = check_login(uid, pin)
-        if not ok:
-            st.error(err)
-        else:
-            st.success(f"ยินดีต้อนรับ {user['name']} 🎉")
-            st.session_state["user"] = dict(user)
-            st.session_state["route"] = "portal"
-            st.rerun()
-
-# ---------------------------
-# 3) หน้า Home (ทำ callback + ใส่ key ปุ่ม)
-# ---------------------------
-def _go_login():
-    st.session_state["route"] = "login"
-    st.rerun()
-
-def home_page():
-    st.image("assets/banner.jpg", use_container_width=True)
-    st.markdown("## 🏫 ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่")
-    st.button("เข้าสู่ระบบ", key="btn_go_login", on_click=_go_login)
-
-# ---------------------------
-# 4) หน้า Portal (คงเดิม)
-# ---------------------------
-def user_portal():
-    u = st.session_state.get("user", {})
-    st.info(f"สวัสดีคุณ {u.get('name','')} 👋")
-    st.write(f"บทบาท (role): **{u.get('role','')}**")
-    if st.button("ออกจากระบบ", key="btn_logout"):
-        st.session_state.clear()
-        st.session_state["route"] = "home"
-        st.rerun()
-
-# ---------------------------
-# 5) Router (คงเดิม)
-# ---------------------------
-def main():
-    route = st.session_state.get("route", "home")
-    if route == "home":
-        home_page()
-    elif route == "login":
-        login_page()
-    elif route == "portal":
-        user_portal()
-
 if __name__ == "__main__":
     main()
-
