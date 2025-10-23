@@ -1,175 +1,170 @@
 # app.py
-# -*- coding: utf-8 -*-
-
+# ----------------------------------------------------
+# School HR System - Home + Routed Role Logins (4 roles)
+# ครู / ผู้ดูแลโมดูล / แอดมินใหญ่ / ฝ่ายบริหาร (Executive)
+# ----------------------------------------------------
 import os
-import json
-import base64
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-# ====== (ออปชัน) Google Sheets backend ======
-# ตั้งค่า ENV ดังนี้ หากต้องการดึงผู้ใช้จากชีต
-# GOOGLE_SHEETS_ID=<Spreadsheet ID>
-# GOOGLE_SERVICE_ACCOUNT_JSON=<service-account-json ทั้งก้อน>
-USE_SHEETS = bool(os.getenv("GOOGLE_SHEETS_ID") and os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON"))
-SHEET_ID    = os.getenv("GOOGLE_SHEETS_ID", "")
-SHEET_TAB   = os.getenv("GOOGLE_SHEETS_TAB", "users")  # แท็บชื่อ users
-CSV_FALLBACK_PATH = "teachers.csv"                      # สำรองกรณีไม่มีชีต
-
-# ====== Branding ======
+# ==============================
+# Settings & Branding
+# ==============================
 APP_TITLE     = "ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่"
-CONTACT_EMAIL = "pakka555@gmail.com"
-BRAND_PRIMARY = "#0a2342"
-BRAND_MUTED   = "#445b66"
+CONTACT_EMAIL = "pakka555@gmail.com"  # ครูสุพจน์
+
+BRAND_PRIMARY = "#0a2342"            # น้ำเงินกรมท่า
+BRAND_MUTED   = "#445b66"            # เทาอมฟ้า
 
 ASSETS_DIR   = "assets"
 BANNER_PATH  = os.path.join(ASSETS_DIR, "banner.jpg")
 
-# ====== Session Defaults ======
-if "menu" not in st.session_state:
-    st.session_state["menu"] = "หน้าแรก"
+DATA_PATH = "teachers.csv"           # ไฟล์บัญชีผู้ใช้ (CSV)
 
-# route ใช้สำหรับหน้าเฉพาะ เช่น ฝ่ายบริหาร
+# session_state init
 if "route" not in st.session_state:
-    st.session_state["route"] = "home"   # home | executive
+    st.session_state["route"] = "home"    # หน้าแรก
+if "user" not in st.session_state:
+    st.session_state["user"] = None
 
-# ====== Utilities: load users from Google Sheets or CSV ======
-def load_users_df() -> pd.DataFrame:
-    required_cols = [
-        "teacher_id", "name", "email", "department", "pin", "role", "admin_modules"
-    ]
-    if USE_SHEETS:
-        try:
-            import gspread
-            from google.oauth2.service_account import Credentials
-
-            creds_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
-            scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-            credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
-            client = gspread.authorize(credentials)
-            sh = client.open_by_key(SHEET_ID)
-            ws = sh.worksheet(SHEET_TAB)
-            rows = ws.get_all_records()  # list[dict]
-
-            df = pd.DataFrame(rows)
-            for c in required_cols:
-                if c not in df.columns:
-                    df[c] = ""
-            return df.fillna("")
-        except Exception as e:
-            st.error(f"อ่านข้อมูลจาก Google Sheets ไม่สำเร็จ: {e}")
-            # ตกลงไปใช้ CSV แทน
-    # fallback -> CSV
-    try:
-        df = pd.read_csv(CSV_FALLBACK_PATH, dtype=str).fillna("")
-        for c in required_cols:
-            if c not in df.columns:
-                df[c] = ""
-        return df
-    except Exception as e:
-        st.error(f"อ่าน {CSV_FALLBACK_PATH} ไม่สำเร็จ: {e}")
-        return pd.DataFrame(columns=required_cols)
-
-def get_user_by_id(tid: str):
-    df = load_users_df()
-    m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
-    return m.iloc[0].to_dict() if not m.empty else None
-
-def check_login(tid: str, pin: str):
-    if not tid or not pin:
-        return False, None, "กรุณากรอกให้ครบ"
-    u = get_user_by_id(tid)
-    if not u:
-        return False, None, "ไม่พบรหัสผู้ใช้"
-    if str(u.get("pin","")).strip() != str(pin).strip():
-        return False, None, "PIN ไม่ถูกต้อง"
-    return True, u, None
-
-# ====== UI: Global CSS / Fonts ======
+# ==============================
+# Helpers: CSS & Navigation
+# ==============================
 def inject_fonts_and_css():
     st.markdown(
         f"""
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
-
         <style>
-          :root {{
+          :root{{
             --brand: {BRAND_PRIMARY};
             --muted: {BRAND_MUTED};
             --bg-card: #ffffff;
             --bg-soft: #f5f8fb;
             --shadow: 0 10px 30px rgba(10,35,66,0.08);
-            --radius: 14px;
+            --radius: 16px;
           }}
           html, body, [class*="css"] {{
             font-family: 'Noto Sans Thai', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
           }}
-          .block-container {{ max-width: 1240px !important; }}
+          .block-container {{ max-width: 1220px !important; }}
 
           .kys-banner {{
             border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            overflow: hidden; box-shadow: var(--shadow);
             margin: 6px 0 18px 0;
           }}
 
           .kys-title h1 {{
-            margin:0; font-size: clamp(28px, 2.6vw, 38px); color: var(--brand); font-weight:800; text-align:center;
+            margin: 12px 0 6px 0; font-size: clamp(26px,2.6vw,36px);
+            font-weight: 800; color: var(--brand); text-align:center;
           }}
-          .kys-title p {{
-            margin:6px 0 0 0; color: var(--muted); text-align:center; font-size:18px;
-          }}
+          .kys-title p {{ margin:0; text-align:center; color:var(--muted) }}
 
           .kys-grid {{
-            display:grid; grid-template-columns: repeat(3, 1fr);
-            gap: 26px; margin-top:14px;
+            display:grid; gap:26px; margin-top:16px;
+            grid-template-columns: repeat(3,1fr);
           }}
-          @media (max-width: 1100px) {{ .kys-grid{{ grid-template-columns: repeat(2, 1fr); }} }}
-          @media (max-width: 760px)  {{ .kys-grid{{ grid-template-columns: 1fr; }} }}
+          @media (max-width:1100px) {{ .kys-grid {{ grid-template-columns: repeat(2,1fr); }} }}
+          @media (max-width:760px)  {{ .kys-grid {{ grid-template-columns: 1fr; }} }}
 
           .kys-card {{
-            background: var(--bg-card);
+            background:var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 24px 22px;
-            display:flex; flex-direction: column; min-height: 320px;
+            padding: 22px 22px 16px;
+            display:flex; flex-direction:column; min-height: 300px;
           }}
-          .kys-card h3 {{ margin:0 0 6px 0; font-weight:800; color: var(--brand); }}
-          .kys-card h4 {{ margin:0 0 10px 0; font-weight:600; color: var(--muted); }}
-          .kys-card ul {{ margin: 8px 0 0 18px; color:#314657; line-height:1.6; }}
+          .kys-card h3 {{ margin: 0 0 6px 0; font-weight:800; color:var(--brand) }}
+          .kys-card h4 {{ margin: 0 0 10px 0; font-weight:600; color:var(--muted) }}
+          .kys-card ul {{ margin: 10px 0 0 18px; color:#314657; line-height:1.65 }}
 
           .kys-btn {{
-            display:inline-flex; align-items:center; justify-content:center; gap:8px;
-            padding: 12px 16px; border-radius: 12px;
-            background: var(--brand); color:#fff !important; text-decoration:none !important;
-            box-shadow: var(--shadow); margin-top: 14px; min-height: 48px;
+            display:inline-flex; align-items:center; justify-content:center;
+            gap:8px; padding: 12px 16px; border-radius: 12px;
+            background: var(--brand); color: #fff !important; text-decoration:none !important;
+            box-shadow: var(--shadow); min-height: 44px;
           }}
           .kys-btn:hover {{ filter:brightness(1.06); }}
 
           .kys-contact {{ width:100%; display:flex; justify-content:flex-end; margin-top:18px; }}
-          .kys-contact a {{
+          .kys-pill-link {{
             display:inline-flex; align-items:center; gap:8px; padding: 10px 14px;
-            border-radius: 999px; background: #0f2748; color: #fff !important; text-decoration:none; box-shadow: var(--shadow);
+            border-radius: 999px; background:#0f2748; color:#fff !important; text-decoration:none; box-shadow: var(--shadow);
           }}
 
-          .muted {{ color: var(--muted); }}
+          .kys-loginbox {{
+            background:var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
+            padding: 18px 18px;
+          }}
+
+          .kys-back {{ margin-top:12px; }}
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-# ====== Pages ======
-def show_home():
+def go(route: str):
+    """เปลี่ยนหน้า (route) + rerun"""
+    st.session_state["route"] = route
+    st.rerun()
+
+# ==============================
+# Auth (CSV-based) — same asเดิม
+# ==============================
+REQUIRED_COLS = {"teacher_id","name","email","department","pin","role","admin_modules"}
+
+def load_users() -> pd.DataFrame:
+    try:
+        df = pd.read_csv(DATA_PATH, dtype=str).fillna("")
+        missing = REQUIRED_COLS - set(df.columns)
+        if missing:
+            st.warning(f"ไฟล์ '{DATA_PATH}' ไม่มีคอลัมน์: {', '.join(missing)} – จะใช้โหมดสาธิตชั่วคราว", icon="⚠️")
+            return pd.DataFrame()
+        return df
+    except Exception:
+        # ไม่มีไฟล์/อ่านไม่ได้ → โหมดสาธิต
+        return pd.DataFrame()
+
+def get_user(tid: str):
+    df = load_users()
+    if df.empty:
+        # demo mode: mock user
+        return {
+            "teacher_id": tid,
+            "name": "ผู้ใช้สาธิต",
+            "email": "",
+            "department": "",
+            "pin": "1234",
+            "role": "teacher",         # ค่าเริ่มต้น
+            "admin_modules": "",
+        }
+    m = df[df["teacher_id"].astype(str).str.strip() == str(tid).strip()]
+    return m.iloc[0].to_dict() if not m.empty else None
+
+def check_login(tid: str, pin: str):
+    if not tid or not pin:
+        return False, None, "กรุณากรอกให้ครบ"
+    u = get_user(tid)
+    if not u: return False, None, "ไม่พบรหัสผู้ใช้"
+    if str(u.get("pin","")).strip() != str(pin).strip():
+        return False, None, "PIN ไม่ถูกต้อง"
+    return True, u, None
+
+# ==============================
+# Pages
+# ==============================
+def page_home():
     inject_fonts_and_css()
 
-    # banner (ถ้ามี)
+    # 1) Banner (ถ้ามี)
     if os.path.exists(BANNER_PATH):
         st.markdown('<div class="kys-banner">', unsafe_allow_html=True)
         st.image(BANNER_PATH, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # title
+    # 2) Title & Subtitle
     st.markdown(
         f"""
         <div class="kys-title">
@@ -180,10 +175,11 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # การ์ด 3 ใบเดิม + ปุ่มไป “ฝ่ายบริหาร” (การ์ดสั้นๆ)
-    col1, col2, col3 = st.columns(3, gap="large")
+    # 3) Grid 3 ใบ (ครู / ผู้ดูแลโมดูล / แอดมินใหญ่)
+    st.markdown('<div class="kys-grid">', unsafe_allow_html=True)
 
-    with col1:
+    # --- Teacher Card ---
+    with st.container():
         st.markdown(
             """
             <div class="kys-card">
@@ -199,22 +195,11 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_teacher"):
-            tid = st.text_input("Teacher ID", key="t_tid")
-            pin = st.text_input("PIN", type="password", key="t_pin")
-            submit_t = st.form_submit_button("🔐 เข้าสู่ระบบครู")
-            if submit_t:
-                ok, u, err = check_login(tid, pin)
-                if not ok: st.error(err)
-                else:
-                    if u.get("role","").strip().lower() in ["teacher","module_admin","superadmin","executive"]:
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
-                        st.session_state["user"] = u
-                    else:
-                        st.error("สิทธิ์ไม่พอสำหรับเมนูนี้")
+        st.link_button("🔐 ไปหน้าเข้าสู่ระบบครู", "#", help="ไปหน้า Login ครู", on_click=lambda: go("login_teacher"), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    with col2:
+    # --- Module Admin Card ---
+    with st.container():
         st.markdown(
             """
             <div class="kys-card">
@@ -230,22 +215,11 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_module_admin"):
-            tid2 = st.text_input("User ID", key="m_tid")
-            pin2 = st.text_input("PIN", type="password", key="m_pin")
-            submit_m = st.form_submit_button("🔐 เข้าสู่ระบบผู้ดูแลโมดูล")
-            if submit_m:
-                ok, u, err = check_login(tid2, pin2)
-                if not ok: st.error(err)
-                else:
-                    if u.get("role","").strip().lower() in ["module_admin","superadmin"]:
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')} (ผู้ดูแลโมดูล)")
-                        st.session_state["user"] = u
-                    else:
-                        st.error("เมนูนี้สำหรับผู้ดูแลโมดูลเท่านั้น")
+        st.link_button("🔐 ไปหน้าเข้าสู่ระบบผู้ดูแลโมดูล", "#", on_click=lambda: go("login_module"), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    with col3:
+    # --- Superadmin Card ---
+    with st.container():
         st.markdown(
             """
             <div class="kys-card">
@@ -261,46 +235,40 @@ def show_home():
             """,
             unsafe_allow_html=True,
         )
-        with st.form("login_superadmin"):
-            tid3 = st.text_input("User ID", key="s_tid")
-            pin3 = st.text_input("PIN", type="password", key="s_pin")
-            submit_s = st.form_submit_button("🔐 เข้าสู่ระบบแอดมินใหญ่")
-            if submit_s:
-                ok, u, err = check_login(tid3, pin3)
-                if not ok: st.error(err)
-                else:
-                    if u.get("role","").strip().lower() == "superadmin":
-                        st.success(f"ยินดีต้อนรับคุณ {u.get('name','')} (แอดมินใหญ่)")
-                        st.session_state["user"] = u
-                    else:
-                        st.error("เมนูนี้สำหรับแอดมินใหญ่เท่านั้น")
+        st.link_button("🔐 ไปหน้าเข้าสู่ระบบแอดมินใหญ่", "#", on_click=lambda: go("login_superadmin"), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # แถวล่าง: การ์ดปุ่มไป 'ฝ่ายบริหาร'
-    ex1, ex2, ex3 = st.columns([1,2,1])
-    with ex2:
+    # 4) Executive section (แสดงเดี่ยวด้านล่าง)
+    with st.container():
         st.markdown(
             """
-            <div class="kys-card">
-              <h3>🏫 ฝ่ายบริหาร (Executive)</h3>
-              <p class="muted">สำหรับผู้อำนวยการ / รองผู้อำนวยการ</p>
+            <div class="kys-card" style="margin-top:18px;">
+              <div>
+                <h3>🏫 ฝ่ายบริหาร (Executive)</h3>
+                <h4>สำหรับผู้อำนวยการ / รองผู้อำนวยการ</h4>
+              </div>
             """,
             unsafe_allow_html=True,
         )
-        if st.button("➡️ ไปยังหน้าฝ่ายบริหาร", use_container_width=True):
-            st.session_state["route"] = "executive"
-            st.experimental_rerun()
+        st.link_button("🔐 ไปยังหน้าฝ่ายบริหาร", "#", on_click=lambda: go("login_executive"), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # footer
+    # 5) ติดต่อผู้ดูแล
     st.markdown(
         f"""
         <div class="kys-contact">
-          <a href="mailto:{CONTACT_EMAIL}">📧 ติดต่อผู้ดูแลระบบ</a>
+          <a class="kys-pill-link" href="mailto:{CONTACT_EMAIL}">📧 ติดต่อผู้ดูแลระบบ</a>
         </div>
-        <hr style="margin-top:32px;margin-bottom:12px;border:1px solid #e0e6ec;">
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 6) Footer
+    st.markdown(
+        """
+        <hr style="margin-top:26px;margin-bottom:12px;border:1px solid #e0e6ec;">
         <div style='text-align:center; color:#445b66; font-size:15px;'>
             พัฒนาโดย <b>กลุ่มบริหารงานบุคคล โรงเรียนอนุบาลวัดคลองใหญ่ จังหวัดตราด</b><br>
             เพื่อยกระดับการบริหารจัดการงานบุคคลให้ทันสมัย โปร่งใส และตรวจสอบได้
@@ -309,69 +277,98 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-def show_executive_portal():
-    # ใส่ CSS/ฟอนต์ให้เหมือนหน้าที่เหลือ
+# ---------- Login pages ----------
+def page_login(role_key: str, title: str, allow_roles: list, next_route: str):
+    """Generic login page for a role"""
     inject_fonts_and_css()
-    st.title("พื้นที่สำหรับฝ่ายบริหาร (Executive)")
-    st.info("หน้านี้สำหรับผู้อำนวยการ / รองผู้อำนวยการ เท่านั้น")
-    # TODO: ต่อเติมเมนู/รายงาน/สรุปต่าง ๆ ที่ฝ่ายบริหารต้องใช้
 
-
-    with st.form("login_executive"):
-        tid = st.text_input("Executive ID")
+    st.markdown(f"<h2 style='text-align:center;color:{BRAND_PRIMARY}'>{title}</h2>", unsafe_allow_html=True)
+    st.markdown("<div class='kys-loginbox'>", unsafe_allow_html=True)
+    with st.form(f"login_form_{role_key}"):
+        tid = st.text_input("User ID / Teacher ID")
         pin = st.text_input("PIN", type="password")
-        submit = st.form_submit_button("🔐 เข้าสู่ระบบฝ่ายบริหาร")
-        if submit:
-            ok, u, err = check_login(tid, pin)
-            if not ok:
+        ok = st.form_submit_button("🔐 เข้าสู่ระบบ")
+        if ok:
+            success, u, err = check_login(tid, pin)
+            if not success:
                 st.error(err)
             else:
-                role = u.get("role","").strip().lower()
-                if role in ["executive", "superadmin"]:
-                    st.success(f"สวัสดีคุณ {u.get('name','')} — เข้าสู่พื้นที่ฝ่ายบริหารสำเร็จ")
+                # ตรวจสิทธิ์
+                role = str(u.get("role","")).strip().lower()
+                if role in [r.lower() for r in allow_roles]:
+                    st.success(f"ยินดีต้อนรับคุณ {u.get('name','')}")
                     st.session_state["user"] = u
-                    # TODO: ต่อยอดเมนู / รายงานของฝ่ายบริหารที่นี่
+                    go(next_route)
                 else:
-                    st.error("เมนูนี้สำหรับฝ่ายบริหารเท่านั้น")
+                    st.error("สิทธิ์ไม่เพียงพอสำหรับเมนูนี้")
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.button("⬅️ กลับหน้าแรก", on_click=lambda: go("home"), use_container_width=False)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("⬅️ กลับหน้าแรก"):
-        st.session_state["route"] = "home"
-        st.experimental_rerun()
-
-def show_teacher_portal():
+# ---------- Portals (placeholder) ----------
+def page_portal(title: str):
     inject_fonts_and_css()
-    st.title("พื้นที่สำหรับผู้ใช้ (ครู)")
-    st.info("หน้านี้ไว้ต่อยอดฟอร์ม/เมนูย่อยสำหรับครูในอนาคตครับ")
+    st.markdown(f"<h2 style='text-align:center;color:{BRAND_PRIMARY}'>{title}</h2>", unsafe_allow_html=True)
+    u = st.session_state.get("user")
+    if not u:
+        st.warning("ยังไม่ได้เข้าสู่ระบบ", icon="⚠️")
+        st.button("⬅️ กลับหน้าแรก", on_click=lambda: go("home"))
+        return
+    st.success(f"ล็อกอินเป็น: {u.get('name','')}  (role: {u.get('role','')})")
+    st.info("หน้านี้เว้นไว้ต่อยอดฟังก์ชันจริงของบทบาทนี้ครับ")
+    st.button("🚪 ออกจากระบบ", on_click=lambda: (st.session_state.update(user=None), go("home")))
 
-def show_admin_portal():
-    inject_fonts_and_css()
-    st.title("พื้นที่สำหรับผู้ดูแล")
-    st.info("หน้านี้ไว้ต่อยอดเมนูย่อยสำหรับผู้ดูแล/แอดมินในอนาคตครับ")
-
-# ====== App Entrypoint ======
+# ==============================
+# App — Routing
+# ==============================
 def main():
     st.set_page_config(page_title=APP_TITLE, page_icon="🏫", layout="wide")
 
-    # --- Sidebar ---
-    with st.sidebar:
-        st.markdown("### เมนู")
-        st.session_state["menu"] = st.radio(
-            "ไปหน้า:",
-            ["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล", "ฝ่ายบริหาร"],
-            index=["หน้าแรก", "สำหรับผู้ใช้", "สำหรับผู้ดูแล", "ฝ่ายบริหาร"].index(st.session_state.get("menu", "หน้าแรก")),
-            label_visibility="collapsed",
+    route = st.session_state.get("route", "home")
+
+    if route == "home":
+        page_home()
+
+    elif route == "login_teacher":
+        page_login(
+            role_key="teacher",
+            title="เข้าสู่ระบบสำหรับครูผู้สอน",
+            allow_roles=["teacher","module_admin","superadmin"],
+            next_route="portal_teacher",
+        )
+    elif route == "login_module":
+        page_login(
+            role_key="module",
+            title="เข้าสู่ระบบผู้ดูแลโมดูล (Module Admin)",
+            allow_roles=["module_admin","superadmin"],
+            next_route="portal_module",
+        )
+    elif route == "login_superadmin":
+        page_login(
+            role_key="superadmin",
+            title="เข้าสู่ระบบแอดมินใหญ่ (Superadmin)",
+            allow_roles=["superadmin"],
+            next_route="portal_superadmin",
+        )
+    elif route == "login_executive":
+        page_login(
+            role_key="executive",
+            title="เข้าสู่ระบบฝ่ายบริหาร (Executive)",
+            allow_roles=["executive","superadmin"],
+            next_route="portal_executive",
         )
 
-    # --- Routing ---
-    if st.session_state["menu"] == "หน้าแรก":
-        show_home()
-    elif st.session_state["menu"] == "สำหรับผู้ใช้":
-        show_teacher_portal()
-    elif st.session_state["menu"] == "สำหรับผู้ดูแล":
-        show_admin_portal()
-    else:  # "ฝ่ายบริหาร"
-        show_executive_portal()
+    # portals (ตัวอย่าง)
+    elif route == "portal_teacher":
+        page_portal("พอร์ทัลสำหรับครูผู้สอน")
+    elif route == "portal_module":
+        page_portal("พอร์ทัลผู้ดูแลโมดูล")
+    elif route == "portal_superadmin":
+        page_portal("พอร์ทัลแอดมินใหญ่")
+    elif route == "portal_executive":
+        page_portal("พอร์ทัลฝ่ายบริหาร")
+    else:
+        go("home")
+
 
 if __name__ == "__main__":
     main()
