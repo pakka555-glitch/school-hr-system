@@ -141,7 +141,6 @@ def footer_once():
         </div>
     """, unsafe_allow_html=True)
 
-
 def page_home():
     show_banner()
 
@@ -149,19 +148,19 @@ def page_home():
     st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
     st.markdown("<div class='kys-sub'>ครูทุกคนสามารถเข้าสู่ระบบเพื่อจัดการข้อมูลส่วนตัวและงานบุคคลได้</div>", unsafe_allow_html=True)
 
-    # ======= ปุ่ม 4 ปุ่มแบบบาลานซ์ตรงกลาง =======
+    # ======= ปุ่ม 4 ปุ่มแบบบาลานซ์กลางจอ =======
     st.markdown("""
         <style>
-        .center-buttons {
-            display: flex;
-            flex-wrap: wrap;
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 230px);
+            gap: 20px 40px;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         .stButton>button {
-            width: 220px !important;
+            width: 230px !important;
             height: 65px !important;
             font-size: 18px !important;
             font-weight: 700 !important;
@@ -172,7 +171,7 @@ def page_home():
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 8px !important;
+            gap: 10px !important;
         }
         .stButton>button:hover {
             filter: brightness(1.08);
@@ -182,30 +181,28 @@ def page_home():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='center-buttons'>", unsafe_allow_html=True)
+    st.markdown("<div class='button-grid'>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2, gap="large")
-    with col1:
-        if st.button("👩‍🏫 ครูผู้สอน", key="go_teacher"):
-            st.session_state["route"] = "login_teacher"
-            st.rerun()
-    with col2:
-        if st.button("⚙️ ผู้ดูแลโมดูล", key="go_module_admin"):
-            st.session_state["route"] = "login_module_admin"
-            st.rerun()
+    # แถวที่ 1
+    if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher"):
+        st.session_state["route"] = "login_teacher"
+        st.rerun()
 
-    col3, col4 = st.columns(2, gap="large")
-    with col3:
-        if st.button("🛡️ แอดมินใหญ่", key="go_superadmin"):
-            st.session_state["route"] = "login_superadmin"
-            st.rerun()
-    with col4:
-        if st.button("🏛️ ฝ่ายบริหาร (Executive)", key="go_exec"):
-            st.session_state["route"] = "login_executive"
-            st.rerun()
+    if st.button("⚙️ ผู้ดูแลโมดูล", key="btn_module_admin"):
+        st.session_state["route"] = "login_module_admin"
+        st.rerun()
+
+    # แถวที่ 2
+    if st.button("🛡️ แอดมินใหญ่", key="btn_superadmin"):
+        st.session_state["route"] = "login_superadmin"
+        st.rerun()
+
+    if st.button("🏛️ ฝ่ายบริหาร (Executive)", key="btn_exec"):
+        st.session_state["route"] = "login_executive"
+        st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
-    # ======= จบส่วนปุ่ม =======
+    # ======= จบปุ่ม =======
 
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
