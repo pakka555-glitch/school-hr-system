@@ -1,4 +1,4 @@
-teacher_id,name,email,department,pin,role,admin_modules
-1001,ครูสุพจน์,supot@example.com,ฝ่ายวิชาการ,1234,teacher,
-2001,ครูสมชาย,somchai@example.com,ฝ่ายบริหาร,5678,executive,
-3001,ครูสุดา,suda@example.com,ฝ่ายบุคคล,9999,superadmin,
+teacher_id,name,email,department,pin,role,position,admin_modules
+T001,ครูสมพร,somporn@example.com,ป.4,1234,teacher,ครูผู้สอน,
+A001,ครูศิริปรภา,sriprapa@example.com,งานบุคคล,1111,module_admin,เจ้าหน้าที่งานบุคคล,ลา
+S001,ครูสุพจน์,pakka555@gmail.com,งานบุคคล,0000,"teacher,module_admin,superadmin","หัวหน้างานบุคคล","งานบุคคล"
