@@ -1,5 +1,5 @@
 teacher_id,name,email,department,pin,role,position,admin_modules
 T001,ครูสยาม รุ่งหิรัญวัฒน์,sayam190556@hotmail.com,ป.1,1311,teacher,ครูผู้สอน,
 T002,ครูเครือหวาย คนแรง,kruawaii@gmail.com,ป.1,1211,teacher,ครูผู้สอน,
-A001,ครูแพรแก้ว ปัสสาวะภา,paerpaerkaew@gmail.com,งานบุคคล,1111,"teacher,module_admin",เจ้าหน้าที่งานบุคคล,รางวัล
-S001,ครูสุพจน์ นามโคตร,pakka555@gmail.com,งานบุคคล,9999,"teacher,module_admin,superadmin","หัวหน้างานบุคคล","งานบุคคล"
+A001,ครูแพรแก้ว ปัสสาวะภา,paerpaerkaew@gmail.com,งานบุคคล,1111,"teacher,module_admin","ครูผู้สอน,เจ้าหน้าที่งานบุคคล",รางวัล
+S001,ครูสุพจน์ นามโคตร,pakka555@gmail.com,งานบุคคล,9999,"teacher,module_admin,superadmin","ครูผู้สอน,เจ้าหน้าที่งานบุคคล,หัวหน้างานบุคคล","งานบุคคล"
