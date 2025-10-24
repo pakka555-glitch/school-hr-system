@@ -144,21 +144,14 @@ def footer_once():
 def page_home():
     show_banner()
 
+    # หัวข้อ
     st.markdown("<div class='page-wrap'>", unsafe_allow_html=True)
     st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
     st.markdown("<div class='kys-sub'>ครูทุกคนสามารถเข้าสู่ระบบเพื่อจัดการข้อมูลส่วนตัวและงานบุคคลได้</div>", unsafe_allow_html=True)
 
-    # ======= ปุ่ม 4 ปุ่มแบบบาลานซ์กลางจอ =======
+    # ปรับสไตล์ปุ่มให้เท่ากันทั้งหมด
     st.markdown("""
         <style>
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 230px);
-            gap: 20px 40px;
-            justify-content: center;
-            align-items: center;
-            margin-top: 40px;
-        }
         .stButton>button {
             width: 230px !important;
             height: 65px !important;
@@ -168,10 +161,6 @@ def page_home():
             background: #0f57c7 !important;
             color: white !important;
             box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 10px !important;
         }
         .stButton>button:hover {
             filter: brightness(1.08);
@@ -181,7 +170,39 @@ def page_home():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='button-grid'>", unsafe_allow_html=True)
+    # ===== จัดเลย์เอาต์ 2×2 ให้อยู่ "กลางเพจ" =====
+    # คอลัมน์ซ้าย/กลาง/ขวา -> ใช้ซ้าย/ขวาเป็นตัวเว้นระยะ
+    left_sp, center, right_sp = st.columns([1, 2, 1])
+
+    with center:
+        # แถวที่ 1
+        c1, c2 = st.columns(2, gap="large")
+        with c1:
+            if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher"):
+                st.session_state["route"] = "login_teacher"
+                st.rerun()
+        with c2:
+            if st.button("⚙️ ผู้ดูแลโมดูล", key="btn_module_admin"):
+                st.session_state["route"] = "login_module_admin"
+                st.rerun()
+
+        # เว้นระยะเล็กน้อยระหว่างแถว
+        st.write("")
+        st.write("")
+
+        # แถวที่ 2
+        c3, c4 = st.columns(2, gap="large")
+        with c3:
+            if st.button("🛡️ แอดมินใหญ่", key="btn_superadmin"):
+                st.session_state["route"] = "login_superadmin"
+                st.rerun()
+        with c4:
+            if st.button("🏛️ ฝ่ายบริหาร (Executive)", key="btn_exec"):
+                st.session_state["route"] = "login_executive"
+                st.rerun()
+
+    footer_once()
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # แถวที่ 1
     if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher"):
