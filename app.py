@@ -56,66 +56,75 @@ def show_banner():
 # ======================
 def inject_css():
     st.markdown("""
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
-      html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap');
+          html, body, [class*="css"] { font-family: 'Noto Sans Thai', sans-serif; }
 
-      :root{
-        --brand:#0a2342; --muted:#445b66; --soft:#f5f8fb;
-        --shadow:0 10px 30px rgba(10,35,66,.10); --radius:14px;
-      }
+          :root{
+            --brand:#0a2342;
+            --muted:#445b66;
+            --soft:#f5f8fb;
+            --shadow:0 10px 30px rgba(10,35,66,.10);
+            --radius:14px;
+          }
 
-      .page-wrap{ max-width: 1000px; margin: 0 auto; }
-      .kys-title{ text-align:center; color:var(--brand); font-weight:800; margin: 12px 0 6px 0; }
-      .kys-sub{ text-align:center; color:var(--muted); font-size:14.5px; margin-bottom: 16px; }
+          .page-wrap{ max-width: 1080px; margin: 0 auto; }
+          .kys-title{ text-align:center; color:var(--brand); font-weight:800; margin: 12px 0 6px 0; }
+          .kys-sub{ text-align:center; color:var(--muted); font-size:14.5px; margin-bottom: 18px; }
 
-      /* การ์ดแนวตั้งตรงกลาง + มี hover */
-      .kys-card-v2{
-        background:#fff; border-radius:16px; box-shadow:var(--shadow);
-        padding:24px 28px 20px 28px; margin: 24px auto;
-        border: 1px solid #e8eef6;
-        text-align:center;
-        max-width:800px;
-        transition: all 0.25s ease-in-out;
-      }
+          .hero{
+            position: relative; width: 100%; border-radius: 12px; overflow: hidden;
+            box-shadow: var(--shadow); margin: 6px 0 14px 0;
+          }
+          .hero-img{ width: 100%; display: block; }
+          .hero-logo{
+            position: absolute; left: 14px; top: 14px; width: 72px; height: auto;
+            border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,.25); background: #fff; padding: 6px;
+          }
+          .hero-title{
+            position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+            color: #fff; font-weight: 800; font-size: clamp(18px, 2.2vw, 28px);
+            text-shadow: 0 6px 16px rgba(0,0,0,.6); background: rgba(0,0,0,.22);
+            padding: 8px 14px; border-radius: 12px;
+          }
 
-      /* เอฟเฟกต์เวลาเอาเมาส์ชี้ */
-      .kys-card-v2:hover {
-        transform: scale(1.02);
-        box-shadow: 0 12px 30px rgba(10,35,66,.15);
-      }
+          .kys-card{
+            background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+            padding:18px 18px 12px 18px; margin-bottom: 14px;
+          }
 
-      .kys-card-v2 h3{
-        margin:0 0 6px 0; font-weight:800; color:#0d1b2a;
-        display:flex; gap:8px; align-items:center; justify-content:center;
-        font-size: 22px;
-      }
+          /* 🔧 ปรับ “เฉพาะหัวข้อการ์ด” ให้กึ่งกลาง  */
+          .kys-card h3, .kys-card h4{
+            text-align:center;
+            margin: 0 0 8px 0;
+            color: var(--brand);
+          }
 
-      .kys-role{ color:#1f3a5f; font-weight:700; margin: 8px 0 6px 0; text-align:center; }
+          /* รายการบูลเล็ตยังชิดซ้ายปกติ */
+          .kys-card ul{
+            text-align:left;
+            margin: 6px 0 0 22px;
+            line-height: 1.55;
+            color:#2f4759;
+          }
 
-      .kys-card-v2 ul{ 
-        margin:8px auto 14px auto;
-        line-height:1.6; color:#2f4759;
-        display:inline-block; text-align:left;
-      }
+          /* แถวปุ่มในแต่ละการ์ดให้กึ่งกลาง */
+          .kys-card .btn-row{
+            display:flex;
+            justify-content:center;
+            margin-top:12px;
+          }
 
-      /* ปุ่ม */
-      .stButton>button{
-        width: 80% !important;
-        background:#0f57c7 !important; color:#fff !important;
-        border-radius:10px !important; padding:10px 12px !important;
-        border:0 !important; box-shadow:var(--shadow) !important;
-        display:block; margin: 0 auto;
-        font-weight:600;
-        transition: all 0.2s ease;
-      }
-      .stButton>button:hover{
-        filter:brightness(1.07);
-        transform: scale(1.03);
-      }
+          .stButton>button{
+            width:100% !important;
+            background:#0f57c7 !important; color:#fff !important;
+            border-radius:12px !important; padding:10px 12px !important;
+            border:0 !important; box-shadow:var(--shadow) !important;
+          }
+          .stButton>button:hover{ filter:brightness(1.06); }
 
-      .kys-footer{ text-align:center; color:#5b6b7a; font-size:13px; margin-top:20px; }
-    </style>
+          .kys-footer{ text-align:center; color:#5b6b7a; font-size:13px; margin-top:12px; }
+        </style>
     """, unsafe_allow_html=True)
 
 inject_css()
