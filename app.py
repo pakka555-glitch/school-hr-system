@@ -207,7 +207,6 @@ def page_home():
     st.markdown("</div>", unsafe_allow_html=True)
     # ======= จบส่วนปุ่ม =======
 
-    contact_block()
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
 
