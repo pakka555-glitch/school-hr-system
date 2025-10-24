@@ -211,10 +211,6 @@ def page_home():
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-    footer_once()
-
-
 def login_page(title, roles, next_route):
     st.markdown(f"<h3 class='kys-title'>{title}</h3>", unsafe_allow_html=True)
     with st.form("login_form"):
