@@ -79,11 +79,11 @@ def inject_css():
         text-shadow: 0 6px 16px rgba(0,0,0,.6); background: rgba(0,0,0,.22);
         padding: 8px 14px; border-radius: 12px; }
 
-      /* ===== CARD (จัดกึ่งกลางทุกส่วนจริง ๆ) ===== */
+      /* ===== CARD (อยู่กึ่งกลางจริง ๆ) ===== */
       .kys-card-v2{
         background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
         padding:24px 28px; margin: 20px auto;
-        max-width: 1080px;
+        width:100%; max-width:1080px;
 
         display:flex;
         flex-direction:column;
@@ -114,42 +114,18 @@ def inject_css():
         line-height:1.6;
         color:#2f4759;
       }
-
-      .kys-card-v2 li{
-        text-align:center;
-        margin-bottom:6px;
-      }
+      .kys-card-v2 li{ margin-bottom:6px; text-align:center; }
 
       /* ===== BUTTON ===== */
       .stButton>button{
         width:80% !important;
-        background:#0f57c7 !important;
-        color:#fff !important;
-        border-radius:12px !important;
-        padding:10px 12px !important;
-        border:0 !important;
-        box-shadow:var(--shadow) !important;
-        display:block;
-        margin:0 auto;
-        font-weight:600;
-        transition:all 0.2s ease;
+        background:#0f57c7 !important; color:#fff !important;
+        border-radius:12px !important; padding:10px 12px !important;
+        border:0 !important; box-shadow:var(--shadow) !important;
+        display:block; margin:0 auto;
+        font-weight:600; transition:all 0.2s ease;
       }
-
-      .stButton>button:hover{
-        filter:brightness(1.07);
-        transform:scale(1.03);
-      }
-
-      /* ===== GLOBAL TEXT CENTER ===== */
-      .main .block-container h1,
-      .main .block-container h2,
-      .main .block-container h3,
-      .main .block-container h4,
-      .main .block-container p,
-      .main .block-container ul,
-      .main .block-container li {
-        text-align:center !important;
-      }
+      .stButton>button:hover{ filter:brightness(1.07); transform:scale(1.03); }
 
       .kys-footer{ text-align:center; color:#5b6b7a; font-size:13px; margin-top:20px; }
     </style>
@@ -194,7 +170,6 @@ def check_login(uid, pin, allowed_roles):
 # Layout helpers
 # ======================
 def contact_block():
-    # ปุ่มติดต่อผู้ดูแล (วางล่างสุดของโฮมเพจ)
     col = st.columns([1,6,1])[1]
     with col:
         st.markdown(
@@ -218,21 +193,26 @@ def footer_once():
         </div>
     """, unsafe_allow_html=True)
 
-# ----- การ์ดแนวตั้งแบบใหม่ -----
+# ----- การ์ดแนวตั้ง (ห่อด้วยคอลัมน์กลางให้กึ่งกลางทั้งบล็อก) -----
 def role_card(title_icon, title_text, role_label, bullets, button_text, route_name, key):
-    st.markdown('<div class="kys-card-v2">', unsafe_allow_html=True)
-    st.markdown(f'<h3>{title_icon} {title_text}</h3>', unsafe_allow_html=True)
-    if role_label:
-        st.markdown(f'<div class="kys-role">{role_label}</div>', unsafe_allow_html=True)
-    if bullets:
-        st.markdown("<ul>" + "".join([f"<li>{b}</li>" for b in bullets]) + "</ul>", unsafe_allow_html=True)
+    # คอลัมน์ [ซ้าย, กลาง, ขวา] เพื่อบังคับให้การ์ดอยู่กลางหน้าเสมอ
+    center_col = st.columns([1, 8, 1])[1]
+    with center_col:
+        st.markdown('<div class="kys-card-v2">', unsafe_allow_html=True)
 
-    col = st.columns([1,6,1])[1]
-    with col:
+        st.markdown(f'<h3>{title_icon} {title_text}</h3>', unsafe_allow_html=True)
+        if role_label:
+            st.markdown(f'<div class="kys-role">{role_label}</div>', unsafe_allow_html=True)
+
+        if bullets:
+            st.markdown("<ul>" + "".join([f"<li>{b}</li>" for b in bullets]) + "</ul>", unsafe_allow_html=True)
+
+        # ปุ่มก็กว้างเต็มคอลัมน์กลาง
         if st.button(f"🔐 {button_text}", key=key, use_container_width=True, type="primary"):
             st.session_state["route"] = route_name
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ======================
 # Pages
