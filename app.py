@@ -79,57 +79,65 @@ def inject_css():
         text-shadow: 0 6px 16px rgba(0,0,0,.6); background: rgba(0,0,0,.22);
         padding: 8px 14px; border-radius: 12px; }
 
-      /* ===== CARD (ทุกบรรทัดให้อยู่ตรงกลาง) ===== */
+      /* ===== CARD (จัดกึ่งกลางทุกส่วนจริง ๆ) ===== */
       .kys-card-v2{
         background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
         padding:24px 28px; margin: 20px auto;
-        text-align:center;                
         max-width: 1080px;
-      }
 
-      /* ✅ กึ่งกลางทุกองค์ประกอบใน card */
-      .kys-card-v2 *{
-        text-align:center !important;
-        margin-left:auto !important;
-        margin-right:auto !important;
-        display:block;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
       }
 
       .kys-card-v2 h3{
-        margin-bottom: 8px; color: var(--brand); font-weight: 800;
+        margin-bottom:8px;
+        color:var(--brand);
+        font-weight:800;
+        text-align:center;
       }
 
       .kys-card-v2 .kys-role{
-        color:#5b6b7a; margin-bottom:6px; font-weight:600;
+        color:#5b6b7a;
+        margin-bottom:6px;
+        font-weight:600;
+        text-align:center;
       }
 
       .kys-card-v2 ul{
-        list-style-position: inside;     
+        list-style-position: inside;
+        padding-left:0;
+        margin:8px 0;
         text-align:center;
-        padding-left: 0;
-        margin: 8px auto;
-        line-height: 1.6;
+        line-height:1.6;
         color:#2f4759;
       }
 
       .kys-card-v2 li{
-        margin-bottom: 6px;
+        text-align:center;
+        margin-bottom:6px;
       }
 
       /* ===== BUTTON ===== */
       .stButton>button{
         width:80% !important;
-        background:#0f57c7 !important; color:#fff !important;
-        border-radius:12px !important; padding:10px 12px !important;
-        border:0 !important; box-shadow:var(--shadow) !important;
-        display:block; margin: 0 auto;
+        background:#0f57c7 !important;
+        color:#fff !important;
+        border-radius:12px !important;
+        padding:10px 12px !important;
+        border:0 !important;
+        box-shadow:var(--shadow) !important;
+        display:block;
+        margin:0 auto;
         font-weight:600;
-        transition: all 0.2s ease;
+        transition:all 0.2s ease;
       }
 
       .stButton>button:hover{
         filter:brightness(1.07);
-        transform: scale(1.03);
+        transform:scale(1.03);
       }
 
       /* ===== GLOBAL TEXT CENTER ===== */
@@ -140,7 +148,7 @@ def inject_css():
       .main .block-container p,
       .main .block-container ul,
       .main .block-container li {
-        text-align: center !important;
+        text-align:center !important;
       }
 
       .kys-footer{ text-align:center; color:#5b6b7a; font-size:13px; margin-top:20px; }
