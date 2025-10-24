@@ -144,89 +144,47 @@ def footer_once():
 def page_home():
     show_banner()
 
-    # หัวข้อ
     st.markdown("<div class='page-wrap'>", unsafe_allow_html=True)
-    st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
-    st.markdown("<div class='kys-sub'>ครูทุกคนสามารถเข้าสู่ระบบเพื่อจัดการข้อมูลส่วนตัวและงานบุคคลได้</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<div class='kys-sub'>ครูทุกคนสามารถเข้าสู่ระบบเพื่อจัดการข้อมูลส่วนตัวและงานบุคคลได้</div>",
+        unsafe_allow_html=True,
+    )
 
-    # ปรับสไตล์ปุ่มให้เท่ากันทั้งหมด
-    st.markdown("""
-        <style>
-        .stButton>button {
-            width: 230px !important;
-            height: 65px !important;
-            font-size: 18px !important;
-            font-weight: 700 !important;
-            border-radius: 14px !important;
-            background: #0f57c7 !important;
-            color: white !important;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
-        }
-        .stButton>button:hover {
-            filter: brightness(1.08);
-            transform: translateY(-2px);
-            transition: all 0.15s ease-in-out;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # ===== จัดเลย์เอาต์ 2×2 ให้อยู่ "กลางเพจ" =====
-    # คอลัมน์ซ้าย/กลาง/ขวา -> ใช้ซ้าย/ขวาเป็นตัวเว้นระยะ
-    left_sp, center, right_sp = st.columns([1, 2, 1])
-
-    with center:
-        # แถวที่ 1
-        c1, c2 = st.columns(2, gap="large")
-        with c1:
-            if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher"):
+    # ----- ปุ่ม 4 อันแบบบาลานซ์ อยู่กึ่งกลางหน้า -----
+    # แถวบน: ครูผู้สอน | ผู้ดูแลโมดูล
+    c1, c2, c3 = st.columns([1, 2, 1])   # ใช้ 3 คอลูมน์เพื่อวางกริดให้อยู่กลาง
+    with c2:
+        r1c1, r1c2 = st.columns(2)
+        with r1c1:
+            if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher_home", use_container_width=True):
                 st.session_state["route"] = "login_teacher"
                 st.rerun()
-        with c2:
-            if st.button("⚙️ ผู้ดูแลโมดูล", key="btn_module_admin"):
+        with r1c2:
+            if st.button("⚙️ ผู้ดูแลโมดูล", key="btn_module_home", use_container_width=True):
                 st.session_state["route"] = "login_module_admin"
                 st.rerun()
 
-        # เว้นระยะเล็กน้อยระหว่างแถว
-        st.write("")
-        st.write("")
-
-        # แถวที่ 2
-        c3, c4 = st.columns(2, gap="large")
-        with c3:
-            if st.button("🛡️ แอดมินใหญ่", key="btn_superadmin"):
+    # แถวล่าง: แอดมินใหญ่ | ผู้บริหาร
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        r2c1, r2c2 = st.columns(2)
+        with r2c1:
+            if st.button("🛡️ แอดมินใหญ่", key="btn_admin_home", use_container_width=True):
                 st.session_state["route"] = "login_superadmin"
                 st.rerun()
-        with c4:
-            if st.button("🏛️ ฝ่ายบริหาร (Executive)", key="btn_exec"):
+        with r2c2:
+            if st.button("🏛 ฝ่ายบริหาร (Executive)", key="btn_exec_home", use_container_width=True):
                 st.session_state["route"] = "login_executive"
                 st.rerun()
 
+    contact_block()
     footer_once()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # แถวที่ 1
-    if st.button("👩‍🏫 ครูผู้สอน", key="btn_teacher"):
-        st.session_state["route"] = "login_teacher"
-        st.rerun()
-
-    if st.button("⚙️ ผู้ดูแลโมดูล", key="btn_module_admin"):
-        st.session_state["route"] = "login_module_admin"
-        st.rerun()
-
-    # แถวที่ 2
-    if st.button("🛡️ แอดมินใหญ่", key="btn_superadmin"):
-        st.session_state["route"] = "login_superadmin"
-        st.rerun()
-
-    if st.button("🏛️ ฝ่ายบริหาร (Executive)", key="btn_exec"):
-        st.session_state["route"] = "login_executive"
-        st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
-    # ======= จบปุ่ม =======
-
-    footer_once()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 def login_page(title, roles, next_route):
     st.markdown(f"<h3 class='kys-title'>{title}</h3>", unsafe_allow_html=True)
