@@ -69,43 +69,7 @@ def inject_css():
       .kys-title{ text-align:center; color:var(--brand); font-weight:800; margin: 12px 0 6px 0; }
       .kys-sub{ text-align:center; color:var(--muted); font-size:14.5px; margin-bottom: 18px; }
 
-      /* ====== สไตล์การ์ดเวอร์ชันที่ใช้อยู่ (kys-card-v2) ====== */
-      .kys-card-v2{
-        background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
-        padding:24px 28px; margin: 20px auto;
-        text-align:center;                /* 🟢 จัดกึ่งกลางในกล่อง */
-        max-width: 1080px;
-      }
-      .kys-card-v2 h3{
-        margin: 0 0 10px 0; color: var(--brand); font-weight: 800;
-        text-align: center;
-      }
-      .kys-card-v2 .kys-role{
-        color:#5b6b7a; margin-bottom:6px; font-weight:600;
-      }
-      .kys-card-v2 ul{
-        list-style-position: inside;      /* bullet อยู่ด้านใน ทำให้ดูอยู่กลาง */
-        text-align:center;                /* 🟢 บรรทัดรายการอยู่กลาง */
-        margin: 8px auto; line-height: 1.6; color:#2f4759; padding-left: 0;
-      }
-      .kys-card-v2 li{ margin-bottom: 6px; }
-
-      /* ====== ปุ่ม ====== */
-      .stButton>button{
-        width:80% !important;
-        background:#0f57c7 !important; color:#fff !important;
-        border-radius:12px !important; padding:10px 12px !important;
-        border:0 !important; box-shadow:var(--shadow) !important;
-        display:block; margin: 0 auto;
-        font-weight:600;
-        transition: all 0.2s ease;
-      }
-      .stButton>button:hover{
-        filter:brightness(1.07);
-        transform: scale(1.03);
-      }
-
-      /* ====== แบนเนอร์ (คงเดิม) ====== */
+      /* ===== HERO ===== */
       .hero{ position: relative; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); margin: 6px 0 14px 0; }
       .hero-img{ width: 100%; display: block; }
       .hero-logo{ position: absolute; left: 14px; top: 14px; width: 72px; height: auto; border-radius: 12px;
@@ -115,21 +79,67 @@ def inject_css():
         text-shadow: 0 6px 16px rgba(0,0,0,.6); background: rgba(0,0,0,.22);
         padding: 8px 14px; border-radius: 12px; }
 
-      /* ====== จัดข้อความทุกบรรทัดให้อยู่กึ่งกลางในเนื้อหา ====== */
+      /* ===== CARD (ทุกบรรทัดให้อยู่ตรงกลาง) ===== */
+      .kys-card-v2{
+        background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+        padding:24px 28px; margin: 20px auto;
+        text-align:center;                
+        max-width: 1080px;
+      }
+
+      /* ✅ กึ่งกลางทุกองค์ประกอบใน card */
+      .kys-card-v2 *{
+        text-align:center !important;
+        margin-left:auto !important;
+        margin-right:auto !important;
+        display:block;
+      }
+
+      .kys-card-v2 h3{
+        margin-bottom: 8px; color: var(--brand); font-weight: 800;
+      }
+
+      .kys-card-v2 .kys-role{
+        color:#5b6b7a; margin-bottom:6px; font-weight:600;
+      }
+
+      .kys-card-v2 ul{
+        list-style-position: inside;     
+        text-align:center;
+        padding-left: 0;
+        margin: 8px auto;
+        line-height: 1.6;
+        color:#2f4759;
+      }
+
+      .kys-card-v2 li{
+        margin-bottom: 6px;
+      }
+
+      /* ===== BUTTON ===== */
+      .stButton>button{
+        width:80% !important;
+        background:#0f57c7 !important; color:#fff !important;
+        border-radius:12px !important; padding:10px 12px !important;
+        border:0 !important; box-shadow:var(--shadow) !important;
+        display:block; margin: 0 auto;
+        font-weight:600;
+        transition: all 0.2s ease;
+      }
+
+      .stButton>button:hover{
+        filter:brightness(1.07);
+        transform: scale(1.03);
+      }
+
+      /* ===== GLOBAL TEXT CENTER ===== */
       .main .block-container h1,
       .main .block-container h2,
       .main .block-container h3,
       .main .block-container h4,
-      .main .block-container p{
-        text-align: center !important;
-      }
-      .main .block-container ul{
-        list-style-position: inside !important;
-        padding-left: 0 !important;
-        margin-left: 0 !important;
-        text-align: center !important;
-      }
-      .main .block-container li{
+      .main .block-container p,
+      .main .block-container ul,
+      .main .block-container li {
         text-align: center !important;
       }
 
