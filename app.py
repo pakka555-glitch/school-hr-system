@@ -145,10 +145,20 @@ def footer_once():
 def page_home():
     show_banner()
     st.markdown("<h2 class='kys-title'>ระบบบริหารงานบุคคลโรงเรียนอนุบาลวัดคลองใหญ่</h2>", unsafe_allow_html=True)
-    st.markdown("<div class='kys-sub'>ช่วยให้ครูและบุคลากรทางการศึกษาจัดการข้อมูลบุคคลง่าย โปร่งใส และตรวจสอบได้</div>", unsafe_allow_html=True)
-    if st.button("👩‍🏫 เข้าสู่ระบบครูผู้สอน"):
-        st.session_state["route"] = "login_teacher"
-        st.rerun()
+    st.markdown("<div class='kys-sub'>ครูทุกคนสามารถเข้าสู่ระบบเพื่อจัดการข้อมูลส่วนตัวและงานบุคคลได้</div>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("👩‍🏫 ครูผู้สอน"):
+            st.session_state["route"] = "login_teacher"; st.rerun()
+        if st.button("⚙️ ผู้ดูแลโมดูล"):
+            st.session_state["route"] = "login_module_admin"; st.rerun()
+    with col2:
+        if st.button("🛡️ แอดมินใหญ่"):
+            st.session_state["route"] = "login_superadmin"; st.rerun()
+        if st.button("🏫 ฝ่ายบริหาร (Executive)"):
+            st.session_state["route"] = "login_executive"; st.rerun()
+
     footer_once()
 
 
@@ -172,7 +182,28 @@ def login_page(title, roles, next_route):
 
 def teacher_portal():
     st.success("เข้าสู่ระบบในบทบาท: ครูผู้สอน")
-    st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูของครู")
+    st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูของครู เช่น ใบลา/ข้อมูลส่วนตัว")
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
+    footer_once()
+
+
+def module_portal():
+    st.success("เข้าสู่ระบบในบทบาท: ผู้ดูแลโมดูล")
+    st.info("หน้าตัวอย่างสำหรับต่อยอดเมนูงานบุคคล/อนุมัติคำขอ")
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
+    footer_once()
+
+
+def superadmin_portal():
+    st.success("เข้าสู่ระบบในบทบาท: แอดมินใหญ่")
+    st.info("หน้าตัวอย่างสำหรับต่อยอดระบบภาพรวมและสิทธิ์การใช้งาน")
+    st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
+    footer_once()
+
+
+def executive_portal():
+    st.success("เข้าสู่ระบบในบทบาท: ฝ่ายบริหาร (Executive)")
+    st.info("หน้าตัวอย่างสำหรับต่อยอดรายงาน/สถิติภาพรวมโรงเรียน")
     st.button("ออกจากระบบ", on_click=lambda: st.session_state.update({"route": "home", "user": None}))
     footer_once()
 
@@ -189,8 +220,20 @@ def main():
         page_home()
     elif route == "login_teacher":
         login_page("👩‍🏫 เข้าสู่ระบบครูผู้สอน", ["teacher", "module_admin", "superadmin"], "teacher_portal")
+    elif route == "login_module_admin":
+        login_page("⚙️ เข้าสู่ระบบผู้ดูแลโมดูล", ["module_admin", "superadmin"], "module_portal")
+    elif route == "login_superadmin":
+        login_page("🛡️ เข้าสู่ระบบแอดมินใหญ่", ["superadmin"], "superadmin_portal")
+    elif route == "login_executive":
+        login_page("🏫 เข้าสู่ระบบฝ่ายบริหาร (Executive)", ["executive", "superadmin"], "executive_portal")
     elif route == "teacher_portal":
         teacher_portal()
+    elif route == "module_portal":
+        module_portal()
+    elif route == "superadmin_portal":
+        superadmin_portal()
+    elif route == "executive_portal":
+        executive_portal()
 
 
 if __name__ == "__main__":
