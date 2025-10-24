@@ -161,18 +161,48 @@ inject_css()
 @st.cache_resource(show_spinner=False)
 def get_gs_client():
     """
-    อ่าน service account จาก st.secrets["gcp_service_account"]
-    และ normalize private_key ให้เป็นบรรทัดจริง (ไม่ใช่ '\\n')
+    อ่าน service account จาก st.secrets["gcp_service_account"] ให้ได้แน่ ๆ
+    รองรับ 3 เคส:
+      1) secrets เป็น dict ปกติ
+      2) private_key เป็นสตริงที่มี '\n' -> แปลงเป็นบรรทัดจริง
+      3) private_key ถูกวางเป็น BASE64 ของ "ทั้งไฟล์ JSON" -> ถอด BASE64 แล้วใช้ JSON ที่ได้แทน
     """
     try:
-        info = dict(st.secrets["gcp_service_account"])
+        raw = st.secrets["gcp_service_account"]
 
-        pk = info.get("private_key", "")
-        # กรณีคีย์มี '\\n' ให้แปลงเป็น line break จริง
+        # กรณี raw เป็นสตริง (บางคนเก็บทั้งไฟล์ JSON เป็นสตริงไว้)
+        if isinstance(raw, str):
+            # ถ้าดูเหมือน BASE64 ให้ถอดดู
+            try:
+                decoded = base64.b64decode(raw).decode("utf-8")
+                info = json.loads(decoded)
+            except Exception:
+                # ถ้าไม่ใช่ JSON ก็ถือว่าเป็นรูปแบบผิด
+                raise ValueError("gcp_service_account ใน secrets เป็นสตริงที่ไม่ใช่ JSON")
+        else:
+            info = dict(raw)
+
+        # ถ้า private_key ไม่มี HEAD/TAIL ลองตีความว่าอาจเป็น BASE64 ของทั้ง JSON ถูกวางไว้ในช่องนี้
+        pk = str(info.get("private_key", ""))
+        if "BEGIN PRIVATE KEY" not in pk:
+            try:
+                decoded = base64.b64decode(pk).decode("utf-8")
+                j = json.loads(decoded)
+                if "private_key" in j:
+                    info = j
+                    pk = j["private_key"]
+            except Exception:
+                # ไม่เป็นไร เดี๋ยวลอง normalize ต่อไป
+                pass
+
+        # ทำให้ \n กลายเป็นบรรทัดจริง และตัดช่องว่างส่วนเกิน
+        pk = str(info.get("private_key", ""))
         if "\\n" in pk:
             pk = pk.replace("\\n", "\n")
-        # กันกรณีคีย์เป็น single-line PEM
         info["private_key"] = textwrap.dedent(pk).strip()
+
+        if "BEGIN PRIVATE KEY" not in info["private_key"]:
+            raise ValueError("No key could be detected (private_key ไม่มีหัว/ท้าย PEM)")
 
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -180,10 +210,10 @@ def get_gs_client():
         ]
         creds = Credentials.from_service_account_info(info, scopes=scopes)
         return gspread.authorize(creds)
+
     except Exception as e:
         st.error(f"ไม่สามารถสร้างไคลเอนต์ Google Sheets ได้: {e}")
         raise
-
 
 @st.cache_data(ttl=60)
 def load_users_df() -> pd.DataFrame:
