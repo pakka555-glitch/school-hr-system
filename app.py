@@ -69,31 +69,28 @@ def inject_css():
       .kys-title{ text-align:center; color:var(--brand); font-weight:800; margin: 12px 0 6px 0; }
       .kys-sub{ text-align:center; color:var(--muted); font-size:14.5px; margin-bottom: 18px; }
 
-      .kys-card{
+      /* ====== สไตล์การ์ดเวอร์ชันที่ใช้อยู่ (kys-card-v2) ====== */
+      .kys-card-v2{
         background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
         padding:24px 28px; margin: 20px auto;
-        text-align:center;        /* 🟢 ทุกข้อความในกล่องจะอยู่ตรงกลาง */
+        text-align:center;                /* 🟢 จัดกึ่งกลางในกล่อง */
+        max-width: 1080px;
       }
-
-      .kys-card h3, .kys-card h4{
-        text-align:center;
-        margin: 0 0 10px 0;
-        color: var(--brand);
+      .kys-card-v2 h3{
+        margin: 0 0 10px 0; color: var(--brand); font-weight: 800;
+        text-align: center;
       }
-
-      .kys-card ul{
-        list-style-position: inside;    /* ทำให้ bullet อยู่กลางด้วย */
-        text-align:center;              /* 🟢 รายการบูลเล็ตอยู่กลาง */
-        margin: 8px auto;
-        line-height: 1.6;
-        color:#2f4759;
-        padding-left: 0;
+      .kys-card-v2 .kys-role{
+        color:#5b6b7a; margin-bottom:6px; font-weight:600;
       }
-
-      .kys-card li{
-        margin-bottom: 6px;
+      .kys-card-v2 ul{
+        list-style-position: inside;      /* bullet อยู่ด้านใน ทำให้ดูอยู่กลาง */
+        text-align:center;                /* 🟢 บรรทัดรายการอยู่กลาง */
+        margin: 8px auto; line-height: 1.6; color:#2f4759; padding-left: 0;
       }
+      .kys-card-v2 li{ margin-bottom: 6px; }
 
+      /* ====== ปุ่ม ====== */
       .stButton>button{
         width:80% !important;
         background:#0f57c7 !important; color:#fff !important;
@@ -106,6 +103,34 @@ def inject_css():
       .stButton>button:hover{
         filter:brightness(1.07);
         transform: scale(1.03);
+      }
+
+      /* ====== แบนเนอร์ (คงเดิม) ====== */
+      .hero{ position: relative; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); margin: 6px 0 14px 0; }
+      .hero-img{ width: 100%; display: block; }
+      .hero-logo{ position: absolute; left: 14px; top: 14px; width: 72px; height: auto; border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(0,0,0,.25); background: #fff; padding: 6px; }
+      .hero-title{ position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+        color: #fff; font-weight: 800; font-size: clamp(18px, 2.2vw, 28px);
+        text-shadow: 0 6px 16px rgba(0,0,0,.6); background: rgba(0,0,0,.22);
+        padding: 8px 14px; border-radius: 12px; }
+
+      /* ====== จัดข้อความทุกบรรทัดให้อยู่กึ่งกลางในเนื้อหา ====== */
+      .main .block-container h1,
+      .main .block-container h2,
+      .main .block-container h3,
+      .main .block-container h4,
+      .main .block-container p{
+        text-align: center !important;
+      }
+      .main .block-container ul{
+        list-style-position: inside !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        text-align: center !important;
+      }
+      .main .block-container li{
+        text-align: center !important;
       }
 
       .kys-footer{ text-align:center; color:#5b6b7a; font-size:13px; margin-top:20px; }
@@ -326,3 +351,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
